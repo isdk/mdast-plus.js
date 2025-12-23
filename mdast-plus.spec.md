@@ -6,7 +6,7 @@
 
 ## 1. 核心设计原则 (Design Principles)
 
-1. **Superset (超集原则)**: 完全兼容标准 `mdast` 规范，所有标准工具链（如 `unist-util-visit`）无需修改即可处理。
+1. **Superset (超集原则)**: 完全兼容标准 `mdast` 规范，`unist-util-visit` 等遍历工具可无改动工作。
 2. **Semantic-First (语义优先)**: 节点定义描述“它是什么”（如 `Callout`），而非“它长什么样”（如 `BlueBox`）。
 3. **Unified Extension (统一扩展)**: 不随意发明新节点类型，优先使用 `Directive` (通用指令) 和 `Data` (元数据) 来表达复杂结构。
 4. **Strict Typing (严格类型)**: 全面基于 TypeScript 定义，确保转换管线的类型安全。
@@ -188,10 +188,11 @@ AST 规范 (Canonical Representation):
 ```typescript
 // mdast-plus.d.ts
 import type { Code, Parent, Literal, PhrasingContent, Root } from 'mdast';
+import type { Properties } from 'hast';
 import type { ContainerDirective, LeafDirective, TextDirective } from 'mdast-util-directive';
 import type { Math, InlineMath } from 'mdast-util-math';
 
-export type { Code, Parent, Literal, Properties } from 'mdast';
+export type { Code, Parent, Literal } from 'mdast';
 export type { ContainerDirective, LeafDirective, TextDirective } from 'mdast-util-directive';
 export type { Math, InlineMath } from 'mdast-util-math';
 
@@ -203,7 +204,7 @@ export type MdastAsset = {
 
 export type MdastConvertResult = {
   tree: Root;  // mdast+ tree
-  assets: Asset[];
+  assets: MdastAsset[];
 };
 
 export interface MdastReader<I> {
@@ -211,11 +212,11 @@ export interface MdastReader<I> {
 }
 
 export interface MdastTransformer {
-  transform(tree: Root): Promise<{ tree: Root; assets?: Asset[] }>;
+  transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
 }
 
 export interface MdastWriter<O> {
-  write(tree: Root, assets?: Asset[]): Promise<O>;
+  write(tree: Root, assets?: MdastAsset[]): Promise<O>;
 }
 
 export interface MdastMark extends Parent {
