@@ -1,6 +1,6 @@
 # MDAST+ Specification Proposal
 
-**Version**: 0.2.1
+**Version**: 0.2.2
 **Status**: RFC (Request for Comments)
 **Base**: `mdast` (unist)
 
@@ -34,6 +34,7 @@ mdast+ 将节点分为三大类：**Core (核心)**/**Rich (富文本)**, **DSL 
 | `delete` | GFM | 删除线 | `~~text~~` |
 | `listItem` | GFM | 任务列表 | `checked: true/false/null` |
 | `footnoteReference` / `footnoteDefinition` | GFM | 脚注 | `[^1]` |
+| `image` | Common | 图片 | 尺寸存入 `data.hProperties` (见下文) |
 | `math` / `inlineMath` | STEM | 数学公式 | 独立节点，不使用 Code Block |
 | `mark` | Extension | 高亮 | `==text==` |
 | `sub` / `sup` | Extension | 下标/上标 | `~text~` / `^text^` |
@@ -42,7 +43,11 @@ mdast+ 将节点分为三大类：**Core (核心)**/**Rich (富文本)**, **DSL 
 
 * 为什么 mark/sub/sup 是核心节点？
   * 尽管可以使用指令,但是`mark`/`sub`/`sup`这三种格式属于“行内样式(Inline Style)”，与 `Bold` (`**`), `Italic` (`*`) 同频出现。它们应该像其它 phrasing nodes 一样自然出现在段落内部
-* 标准 Markdown 图片不支持宽高，mdast+ 约定存入: `data: {hProperties: { width: 500, height: 300 }}`
+* 标准 Markdown 图片节点不支持尺寸，mdast+ 约定存入: `data: {hProperties: { width: 500, height: 300 }}`，优先使用数值（像素）。
+* Markdown 语法扩展 (Syntax Extension):
+  * 为了支持 Round-trip (AST <-> Markdown)，mdast+ 推荐采用 Attribute Syntax 扩展（类 Pandoc/Kramdown 风格）来显式表达尺寸：
+    * 示例: `![A cat](cat.png){width=500 height=300}`
+    * 允许支持兼容变体: `![A cat](cat.png width=500 height=300)` 或 `![A cat](cat.png =500x300)`
 
 ### B. DSL & Figures (领域语言与图表)
 
@@ -152,15 +157,29 @@ mdast+ 将节点分为三大类：**Core (核心)**/**Rich (富文本)**, **DSL 
 }
 ```
 
-1) Directive 的标题：Label 与 Attribute 并存，但以 Attribute 为规范化形态
+## Directive 标题规范
 
----------------------------------------------------------
+AST 规范 (Canonical Representation):
 
-### 1.1 规范化约定
+* **MUST**: 所有 Directive 的“标题/显示名”统一落到 `attributes.title` 字段中。
+* **Children**: `children` 应当只包含提示块的正文内容，**不应**包含标题文本。
 
-* **MUST**：所有 directive 的“标题/显示名”统一落到 `attributes.title?: string`（或同义字段）中，作为 **canonical representation**。
-* **MAY**：解析器可以接受 Label 写法（例如 `:::warning[注意]` 或 `:::warning 注意`）作为输入语法糖。
-* **MUST**：若输入使用了 Label 写法，Normalize 阶段必须将其提升/归并到 `attributes.title`，并保证不会把“标题”残留在 `children` 中（避免污染内容树）。
+**Markdown 输入语法 (Input Syntax)**:
+
+* **Standard**: Attribute 写法 `:::warning{title="注意"}` (推荐，最清晰)。
+* **Sugar**: Label 写法 `:::warning[注意]` 或 `:::warning 注意` (允许作为语法糖存在)。
+
+**规范化逻辑 (Normalization Logic)**:
+在 Parse 阶段之后，必须执行 **Title Normalization**：
+
+1. **检测**: 检查 Directive 是否包含 Label (通常解析为 `children` 中的 `directiveLabel` 节点或特定的 Label 结构)。
+2. **提取**:
+    * 若 Label 内容为 **纯文本** (Text-only)，提取其字符串值。
+    * 若 Label 包含 **简单格式** (如加粗 `[**Note**]`)，提取其纯文本内容 (strip formatting)。
+3. **赋值**: 将提取的文本赋值给 `attributes.title`。
+4. **清洗**: 从 `children` 中 **移除** 该 Label 节点，防止标题在正文中重复渲染。
+5. **例外 (Exception)**:
+    * 如果 Label 包含 **复杂内容** (如图片、公式)，则无法转换为简单的 string attribute。此时 **MAY** 保留 Label 节点，由渲染器特殊处理（但这被视为不规范的 Admonition）。
 
 ---
 
@@ -255,6 +274,8 @@ declare module 'mdast' {
 4. **Stringify**: 输出目标格式
     * *To Markdown*
     * *To HTML*
+
+任何会生成/接收 HTML 片段的转换链路，默认必须使用 rehype-sanitize（或等效机制）清洗；
 
 本核心包仅支持markdown,HTML两种基本格式，为了方便扩展其他格式，需要定义简单易用的规范接口，内部的markdown/HTML也需遵循该接口规范实现。
 本规范采用单包(@isdk/mdast-plus)实现，是因为核心包基本上是一些配置约定，依赖生态中的库实现，代码大部分都是比较简单的pipeline, 提供组装好的preset. 可以将transform单独作为plugins目录放置。
