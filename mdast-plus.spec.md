@@ -5,8 +5,7 @@
 **Base**: `mdast` (unist)
 **Scope**: 在不破坏 unist/mdast 生态兼容性的前提下，为 Markdown 文档引入“语义优先”的扩展约定，并给出可实现、可测试、可降级的规范。
 
-1\. 核心设计原则
-----------
+## 1. 核心设计原则
 
 1. **Superset（超集原则）**
     * **MUST**：保持 unist 结构与 mdast 基本语义兼容（`type`、`children`、`value`、`position` 等不被破坏）。常见遍历工具（如 `unist-util-visit`）应可无修改遍历扩展节点。
@@ -550,14 +549,12 @@ Normalize 时：
 
 **Input**
 
-```md
 ```mermaid title="架构图"
 graph TD; A-->B;
 ```
 
-```
-
 **Canonical AST**
+
 ```js
 {
   type: "code",
@@ -579,9 +576,8 @@ graph TD; A-->B;
 graph TD; A-->B;
 ```
 
-```
-
 **After Compile（示意）**
+
 ```js
 {
   type: "image",
