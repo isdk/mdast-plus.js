@@ -1,6 +1,7 @@
 import { visit } from 'unist-util-visit';
 import type { Root, Code } from 'mdast';
 import type { MdastPlugin } from '../types';
+import { parse } from 'shell-quote';
 
 /**
  * Parses a meta string like 'title="My Code" filename="test.js" priority=1'
@@ -8,12 +9,19 @@ import type { MdastPlugin } from '../types';
  */
 function parseMeta(meta: string): Record<string, string> {
   const result: Record<string, string> = {};
-  const regex = /([a-zA-Z0-9_-]+)(?:=?(?:"([^"]*)"|'([^']*)'|([^ \t\n\r\f]+)))?/g;
-  let match;
-  while ((match = regex.exec(meta)) !== null) {
-    const key = match[1];
-    const value = match[2] || match[3] || match[4] || '';
-    result[key] = value;
+  // shell-quote's parse can handle complex shell-like strings
+  const parsedArgs = parse(meta);
+
+  for (const arg of parsedArgs) {
+    if (typeof arg === 'string') {
+      const parts = arg.split('=', 2);
+      if (parts.length === 2) {
+        result[parts[0]] = parts[1];
+      } else {
+        // If it's a standalone flag, treat its value as boolean true
+        result[arg] = 'true';
+      }
+    }
   }
   return result;
 }
