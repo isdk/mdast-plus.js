@@ -15,6 +15,7 @@ import { normalizeDirectivePlugin } from './plugins/normalize-directive';
 import { normalizeTableSpanPlugin } from './plugins/normalize-table-span';
 import { extractCodeMetaPlugin } from './plugins/extract-code-meta';
 import { imageSizePlugin } from './plugins/image-size';
+import { normalizeInlineStyles } from './plugins/normalize-inline-styles';
 
 /**
  * Fluent processor for mdast transformations.
@@ -64,6 +65,7 @@ export class FluentProcessor {
     this.use(normalizeTableSpanPlugin);
     this.use(extractCodeMetaPlugin);
     this.use(imageSizePlugin);
+    this.use(normalizeInlineStyles);
   }
 
   /**

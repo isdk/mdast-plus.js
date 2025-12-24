@@ -67,4 +67,17 @@ describe('Compliance Fixtures', () => {
     expect(html).toContain('mermaid');
     expect(html).toContain('graph TD');
   });
+
+  it('F8: mark/sub/sup as phrasing nodes', async () => {
+    const input = '这是 ==高亮==，H~2~O，2^10^';
+    const html = await mdast(input).toHTML();
+    expect(html).toContain('<mark>高亮</mark>');
+    expect(html).toContain('<sub>2</sub>');
+    expect(html).toContain('<sup>10</sup>');
+
+    const md = await mdast(input).toMarkdown();
+    expect(md).toContain('==高亮==');
+    expect(md).toContain('~2~');
+    expect(md).toContain('^10^');
+  });
 });

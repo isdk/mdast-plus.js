@@ -11,6 +11,7 @@ export function htmlFormat(this: any) {
     .use(remarkRehype)
     .use(rehypeSanitize, {
       ...defaultSchema,
+      tagNames: [...(defaultSchema.tagNames || []), 'mark', 'sub', 'sup'],
       attributes: {
         ...defaultSchema.attributes,
         // Allow rowspan/colspan and other common attributes
