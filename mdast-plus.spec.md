@@ -141,11 +141,11 @@ mdast+ 将节点分为三大类：**Core (核心) & Rich (富文本)**, **DSL (�
 | 级别 | 推荐 Emoji | 推荐颜色 | 适用场景 |
 | --- | --- | --- | --- |
 | **Note** (备注) | ℹ️ 或 📝 | **蓝色** (#209cee) | 补充背景信息、非必要的说明或引用。 |
-| **Tip** (提示) | 💡 或 ✨ | **绿色** (#23d160) | 帮助用户更高效操作的小技巧或“避坑”经验。 |
+| **Tip** (提示) | 💡 或 ✨ | **绿色** (#23d160) | 帮助用户更高效操作的小技巧或“避坑”经验。别名: `success` |
 | **Important** (重要) | ❗ 或 📌 | **青色/深蓝** (#118fe3) | 必须阅读的关键点，如果不看可能会导致操作失败。 |
 | **Caution** (小心) | ⚠️ 或 🔸 | **黄色/橙色** (#ffdd57) | 提醒用户注意非破坏性的风险，如“此操作耗时较长”。 |
 | **Warning** (警告) | 🟠 或 ⚠️ | **橙色** (#ff9500) | 存在潜在的中度风险，如“此操作不可撤销”或“数据将被覆盖”。 |
-| **Danger** (危险) | 🚫 或 ❌ 或 💀 | **红色** (#ff3860) | 极高风险，可能导致严重后果、系统崩溃或安全威胁。 |
+| **Danger** (危险) | 🚫 或 ❌ 或 💀 | **红色** (#ff3860) | 极高风险，可能导致严重后果、系统崩溃或安全威胁。别名: `error` |
 
 提示指令同时支持块级容器和单行内联（TextDirective）两种写法。
 
@@ -237,7 +237,6 @@ AST 规范 (Canonical Representation):
 ### 3.2 TypeScript 定义（推荐参考实现）
 
 ```ts
-// mdast-plus.d.ts
 import type { Root, Parent, PhrasingContent } from "mdast";
 import type { Properties } from "hast";
 import type {
@@ -256,9 +255,9 @@ export type MdastAsset = {
   bytes: Uint8Array;
 };
 
-export type MdastConvertResult = {
-  tree: Root;                 // mdast+ tree
-  assets: MdastAsset[];
+export type ConvertResult<T> = {
+  content: T;            // 转换后的主内容 (String/Buffer/JSON)
+  assets: MdastAsset[];       // 伴随资源
 };
 
 export interface MdastReader<I> {
@@ -269,8 +268,8 @@ export interface MdastTransformer {
   transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
 }
 
-export interface MdastWriter<O> {
-  write(tree: Root, assets?: MdastAsset[]): Promise<O>;
+export interface MdastWriter<Output = string> {
+  write(tree: Root, assets?: Asset[]): Promise<ConvertResult<Output>>;
 }
 
 // Inline style extensions
@@ -621,30 +620,42 @@ graph TD; A-->B;
 
 为实现 mdast+ 的“解析—标准化—编译—输出”闭环，推荐如下顺序：
 
-### 5.1 Parse（读取并生成 mdast+）
+### 5.1 Parse（Input -> Raw AST）
 
-- Docx Reader：将 Word 样式映射到 `data.hProperties`；表格结构映射到 `table/tableRow/tableCell`；必要时写入 `_origin`。
-- Markdown Reader：启用 `remark-gfm`、`remark-math`、`remark-directive` 等。[^directive]
+由 `MdastReader` 负责。
 
-### 5.2 Transform（Normalize）
+* **Markdown**: 加载 `remark-gfm`, `remark-math`, `remark-directive`。
+* **HTML**: 使用 `rehype-parse` -> `rehype-remark`。
+* **Docx/Notion**: 第三方 `Reader` 解析为 `AST`。
+  * 将 Word 样式映射到 `data.hProperties`；表格结构映射到 `table/tableRow/tableCell`；必要时写入 `_origin`。
 
-- **Directive Normalize**：
-  - name 小写化、别名归一
-  - title normalization（见 4.1）
-- **Table Normalize**：rowspan/colspan 迁移（见 4.2）
-- **Code Meta Extract**：解析 `code.meta` → `code.data`（见 4.3）
+### 5.2 Normalization (Raw AST -> Mdast+ AST)
 
-### 5.3 Transform（Compile/Render DSL）
+由 `@isdk/mdast-plus` 内置插件强制执行，确保 AST 符合规范。
 
-- Diagrams：识别 `code.lang`（mermaid/plantuml），按目标输出策略：
+1. **Directive Normalization**:
+   - name 小写化、别名归一
+   - title normalization（见 4.1）
+2. **Table Normalize**：rowspan/colspan 迁移（见 4.2）
+3. **Code Meta Extraction**: 解析 `code.meta` → `code.data`（见 4.3）
+4. **Image Sizing**: 解析图片 URL 中的尺寸参数 (见 2.A.2)
+
+### 5.3 Transform (Compile/Render DSL)
+
+用户自定义或特定场景的 `MdastTransformer`。
+
+* Diagrams：识别 `code.lang`（mermaid/plantuml），按目标输出策略：
   - HTML/React：可保留 code 供客户端渲染
   - Word/PDF：编译为 `image` 并产出 `assets`
-- Data DSL：如 `csv` → `table`（并将原 csv 存入 `_origin.raw`）
+* Data DSL：如 `csv` → `table`（并将原 csv 存入 `_origin.raw`）
+* **Asset Collection**: 下载远程图片为本地 `Asset`，并更新 `image.url`。
 
 ### 5.4 Stringify（输出）
 
-- To Markdown：尽量保持可逆；不支持的结构按降级规则输出
-- To HTML：生成 HTML 前/后进行 sanitize（见 2.B.3）
+由 `MdastWriter` 负责。
+
+- To Markdown：使用 `remark-stringify`。尽量保持可逆；不支持的结构按降级规则输出
+- To HTML：使用 `remark-rehype` -> `rehype-sanitize` (必须) -> `rehype-stringify`, 生成 HTML 前/后进行 sanitize（见 2.B.3）
 
 ---
 
@@ -666,13 +677,13 @@ graph TD; A-->B;
 本规范推荐以单包实现核心“约定 + preset + 类型 + 通用管线接口”：
 
 - `@isdk/mdast-plus`
-  - `presets/markdown.ts`（remark preset）
-  - `presets/html.ts`（rehype preset）
+  - `formats/markdown.ts`（remark preset）
+  - `formats/html.ts`（rehype preset）
   - `plugins/normalize-directive.ts`
   - `plugins/normalize-table-span.ts`
   - `plugins/extract-code-meta.ts`
   - `plugins/compile-mermaid.ts`（可选，或放第三方包）
-  - `types/mdast-plus.d.ts`
+  - `types/mdast-plus.ts`
 
 其他扩展（图表引擎、docx/notion/latex reader/writer）通过独立第三方包实现，以保持核心简洁。
 
