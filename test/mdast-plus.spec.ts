@@ -75,7 +75,12 @@ describe('Compliance Fixtures', () => {
     expect(html).toContain('<sub>2</sub>');
     expect(html).toContain('<sup>10</sup>');
 
-    const md = await mdast(input).toMarkdown();
+    let md = await mdast(input).toMarkdown();
+    expect(md).toContain('==高亮==');
+    expect(md).toContain('~2~');
+    expect(md).toContain('^10^');
+
+    md = await mdast(html).from('HTML').toMarkdown();
     expect(md).toContain('==高亮==');
     expect(md).toContain('~2~');
     expect(md).toContain('^10^');
