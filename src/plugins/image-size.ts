@@ -3,7 +3,9 @@ import type { Root, Image } from 'mdast';
 import type { MdastPlugin } from '../types';
 
 /**
- * This plugin attempts to parse width/height from image attributes.
+ * Plugin to parse image dimensions (width, height) from URL fragments or properties.
+ * e.g., image.png#500x300 or image.png?width=500
+ *
  * It handles standard mdast image data if attributes were already processed
  * (e.g. by remark-attr) or if the URL contains dimensions (optional).
  */

@@ -2,6 +2,10 @@ import remarkRehype from 'remark-rehype';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 
+/**
+ * Unified plugin/configuration for HTML format.
+ * Includes mdast-to-hast conversion, sanitization (with table span support), and stringification.
+ */
 export function htmlFormat(this: any) {
   this
     .use(remarkRehype)

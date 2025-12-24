@@ -18,6 +18,10 @@ function parseMeta(meta: string): Record<string, string> {
   return result;
 }
 
+/**
+ * Plugin to extract metadata from the code block's info string (meta).
+ * e.g., ```js title="Main" filename="app.js"
+ */
 export const extractCodeMetaPlugin: MdastPlugin = {
   name: 'extract-code-meta',
   stage: 'normalize',

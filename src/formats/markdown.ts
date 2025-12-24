@@ -3,6 +3,10 @@ import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 import remarkFrontmatter from 'remark-frontmatter';
 
+/**
+ * Unified plugin/configuration for Markdown format.
+ * Includes GFM, directives, math, and frontmatter.
+ */
 export function markdownFormat(this: any) {
   this
     .use(remarkGfm)

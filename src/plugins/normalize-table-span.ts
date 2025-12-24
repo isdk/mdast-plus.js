@@ -2,6 +2,10 @@ import { visit } from 'unist-util-visit';
 import type { Root, TableCell } from 'mdast';
 import type { MdastPlugin } from '../types';
 
+/**
+ * Plugin to normalize table cell spans (rowspan, colspan).
+ * Migrates data.rowspan/colspan to hProperties.rowSpan/colSpan for HTML conversion.
+ */
 export const normalizeTableSpanPlugin: MdastPlugin = {
   name: 'normalize-table-span',
   stage: 'normalize',

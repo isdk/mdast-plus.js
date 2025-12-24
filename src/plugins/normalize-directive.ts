@@ -12,6 +12,10 @@ const ALIASES: Record<string, string> = {
   note: 'note',
 };
 
+/**
+ * Plugin to normalize admonition directives (e.g., :::note).
+ * Handles name aliasing, title extraction from labels, and mapping to HTML classes.
+ */
 export const normalizeDirectivePlugin: MdastPlugin = {
   name: 'normalize-directive',
   stage: 'normalize',
