@@ -2,7 +2,7 @@
 
 > A "Semantic-First" Markdown processing toolkit based on unified, remark and rehype.
 
-English | [简体中文](./README.cn.md)
+English | [简体中文](./README.cn.md) | [GitHub](https://github.com/isdk/mdast-plus.js)
 
 [![NPM version](https://img.shields.io/npm/v/@isdk/mdast-plus.svg)](https://www.npmjs.com/package/@isdk/mdast-plus)
 
@@ -61,6 +61,26 @@ const { content, assets } = await mdast(myInput)
   .to('html');
 ```
 
+### Arbitrary Formats
+
+You can register custom input or output formats:
+
+```typescript
+import { FluentProcessor, mdast } from '@isdk/mdast-plus';
+
+// Register a custom output format
+FluentProcessor.registerFormat('reverse', {
+  stringify: (p) => {
+    p.Compiler = (tree) => {
+      // your custom stringification logic
+      return '...';
+    };
+  }
+});
+
+const result = await mdast('Hello').to('reverse');
+```
+
 ## Staged Processing
 
 Plugins are executed based on their `stage` and `order`:
@@ -77,6 +97,10 @@ Plugins are executed based on their `stage` and `order`:
 | `normalize-table-span` | normalize | Migrates table cell spans to `hProperties`. |
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
+
+## Contributing
+
+Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines on how to contribute to this project.
 
 ## License
 

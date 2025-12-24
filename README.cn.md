@@ -2,7 +2,7 @@
 
 > 基于 unified, remark 和 rehype 的“语义优先” Markdown 处理工具包。
 
-[English](./README.md) | 简体中文
+[English](./README.md) | 简体中文 | [GitHub](https://github.com/isdk/mdast-plus.js)
 
 [![NPM version](https://img.shields.io/npm/v/@isdk/mdast-plus.svg)](https://www.npmjs.com/package/@isdk/mdast-plus)
 
@@ -61,6 +61,26 @@ const { content, assets } = await mdast(myInput)
   .to('html');
 ```
 
+### 任意格式支持
+
+您可以注册自定义的输入或输出格式：
+
+```typescript
+import { FluentProcessor, mdast } from '@isdk/mdast-plus';
+
+// 注册自定义输出格式
+FluentProcessor.registerFormat('reverse', {
+  stringify: (p) => {
+    p.Compiler = (tree) => {
+      // 您的自定义序列化逻辑
+      return '...';
+    };
+  }
+});
+
+const result = await mdast('Hello').to('reverse');
+```
+
 ## 分阶段处理
 
 插件根据它们的 `stage` (阶段) 和 `order` (顺序) 执行：
@@ -77,6 +97,10 @@ const { content, assets } = await mdast(myInput)
 | `normalize-table-span` | normalize | 将表格单元格跨度迁移到 `hProperties`。 |
 | `extract-code-meta` | normalize | 从代码块元数据中解析 `title="foo"`。 |
 | `image-size` | normalize | 从图片 URL 中解析 `#=WxH`。 |
+
+## 贡献
+
+请查看 [CONTRIBUTING.cn.md](./CONTRIBUTING.cn.md) 以获取有关如何贡献本项目的指南。
 
 ## 许可证
 

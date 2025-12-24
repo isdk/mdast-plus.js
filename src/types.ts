@@ -11,6 +11,11 @@ export interface MdastPlugin {
   transform: (tree: Root, ctx: any) => Promise<void> | void;
 }
 
+export interface MdastFormatDefinition {
+  parse?: (processor: any) => void;
+  stringify?: (processor: any) => void;
+}
+
 export interface MdastAsset {
   path: string;
   contentType: string;

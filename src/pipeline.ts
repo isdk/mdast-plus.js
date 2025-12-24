@@ -4,7 +4,7 @@ import remarkStringify from 'remark-stringify';
 import rehypeParse from 'rehype-parse';
 import rehypeRemark from 'rehype-remark';
 import type { Root } from 'mdast';
-import type { MdastPlugin, ConvertResult, MdastAsset } from './types';
+import type { MdastPlugin, ConvertResult, MdastAsset, MdastFormatDefinition } from './types';
 
 // Default Formats
 import { markdownFormat } from './formats/markdown';
@@ -17,9 +17,27 @@ import { extractCodeMetaPlugin } from './plugins/extract-code-meta';
 import { imageSizePlugin } from './plugins/image-size';
 
 export class FluentProcessor {
+  static formats: Record<string, MdastFormatDefinition> = {
+    markdown: {
+      parse: (p) => p.use(remarkParse).use(markdownFormat),
+      stringify: (p) => p.use(remarkStringify).use(markdownFormat),
+    },
+    html: {
+      parse: (p) => p.use(rehypeParse).use(rehypeRemark),
+      stringify: (p) => p.use(htmlFormat),
+    },
+    ast: {
+      parse: (p) => { },
+    },
+  };
+
+  static registerFormat(name: string, definition: MdastFormatDefinition) {
+    FluentProcessor.formats[name] = definition;
+  }
+
   private processor: Processor;
   private input: any;
-  private inputFormat: 'markdown' | 'html' | 'ast' = 'markdown';
+  private inputFormat: string = 'markdown';
   private plugins: MdastPlugin[] = [];
   private globalData: Record<string, any> = {};
 
@@ -34,7 +52,7 @@ export class FluentProcessor {
     this.use(imageSizePlugin);
   }
 
-  from(format: 'markdown' | 'html' | 'ast'): this {
+  from(format: string): this {
     this.inputFormat = format;
     return this;
   }
@@ -51,10 +69,9 @@ export class FluentProcessor {
 
   async to(format: string): Promise<ConvertResult> {
     // 1. Setup Input Parser
-    if (this.inputFormat === 'markdown') {
-      this.processor.use(remarkParse).use(markdownFormat);
-    } else if (this.inputFormat === 'html') {
-      this.processor.use(rehypeParse).use(rehypeRemark);
+    const inputFormatDef = FluentProcessor.formats[this.inputFormat];
+    if (inputFormatDef?.parse) {
+      inputFormatDef.parse(this.processor);
     }
 
     // 2. Parse
@@ -82,10 +99,13 @@ export class FluentProcessor {
 
     // 5. Setup Output Compiler
     const outputProcessor = unified().data('settings', this.processor.data('settings'));
-    if (format === 'markdown') {
-      outputProcessor.use(remarkStringify);
-    } else if (format === 'html') {
-      outputProcessor.use(htmlFormat);
+    const outputFormatDef = FluentProcessor.formats[format];
+    if (outputFormatDef?.stringify) {
+      outputFormatDef.stringify(outputProcessor);
+    }
+    if (format === 'markdown' && !outputFormatDef) {
+      // fallback if somehow removed
+      outputProcessor.use(remarkStringify).use(markdownFormat);
     }
 
     // 6. Finalize (compile)

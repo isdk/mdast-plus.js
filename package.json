@@ -7,7 +7,10 @@
   "homepage": "https://github.com/isdk/mdast-plus.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/isdk/mdast-plus.js.git"
+    "url": "https://github.com/isdk/mdast-plus.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/isdk/mdast-plus.js/issues"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
