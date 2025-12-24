@@ -2,29 +2,35 @@ import { visit } from 'unist-util-visit';
 import type { Root, PhrasingContent, Text } from 'mdast';
 import type { MdastMark, MdastSub, MdastSup, MdastPlugin } from '../types';
 
+/**
+ * Creates an mdast node for mark, sub, or sup.
+ * @param type - The node type
+ * @param children - The child nodes
+ * @returns The created mdast node
+ */
 function createNode(type: 'mark' | 'sub' | 'sup', children: PhrasingContent[]): MdastMark | MdastSub | MdastSup {
   return {
     type,
     children,
     data: {
-      hName: type
-    }
+      hName: type,
+    },
   } as any;
 }
 
-
+/**
+ * Normalizes inline styles in the tree by finding text patterns and converting them to nodes.
+ * Patterns: ==mark==, ~sub~, ^sup^
+ * @param tree - The Root node to transform
+ */
 export function normalizeInlineStylesPlugin(tree: Root) {
   visit(tree, 'text', (node: Text, index, parent: any) => {
     if (!parent || index === undefined) return;
 
-    let text = node.value;
+    const text = node.value;
     let lastIndex = 0;
     const newChildren: PhrasingContent[] = [];
     let matchFound = false;
-
-    // This is a simplified version. For multiple types, we might need a more robust loop.
-    // We'll process one pattern at a time for simplicity in this first version,
-    // or better, a single pass with combined regex.
 
     const combinedRegex = /(==[^=]+==|~[^~]+~|\^[^^]+\^)/g;
     let match;
@@ -67,7 +73,46 @@ export function normalizeInlineStylesPlugin(tree: Root) {
   });
 }
 
-export const normalizeInlineStyles: MdastPlugin = {
+/**
+ * Handlers for converting HAST to mdast (rehype-remark).
+ */
+export const inlineStylesFromHtmlHandlers = {
+  mark: (state: any, node: any) => {
+    const result = { type: 'mark', children: state.all(node) };
+    state.patch(node, result);
+    return result;
+  },
+  sub: (state: any, node: any) => {
+    const result = { type: 'sub', children: state.all(node) };
+    state.patch(node, result);
+    return result;
+  },
+  sup: (state: any, node: any) => {
+    const result = { type: 'sup', children: state.all(node) };
+    state.patch(node, result);
+    return result;
+  },
+};
+
+/**
+ * Handlers for converting mdast to Markdown (remark-stringify).
+ */
+export const inlineStylesToMarkdownHandlers = {
+  mark(node: any, _: any, state: any) {
+    return '==' + state.containerPhrasing(node, { before: '==', after: '==' }) + '==';
+  },
+  sub(node: any, _: any, state: any) {
+    return '~' + state.containerPhrasing(node, { before: '~', after: '~' }) + '~';
+  },
+  sup(node: any, _: any, state: any) {
+    return '^' + state.containerPhrasing(node, { before: '^', after: '^' }) + '^';
+  },
+};
+
+/**
+ * mdast-plus plugin for inline styles support (mark/sub/sup).
+ */
+export const inlineStylesPlugin: MdastPlugin = {
   name: 'normalize-inline-styles',
   stage: 'normalize',
   transform: (tree: Root) => {

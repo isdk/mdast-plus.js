@@ -1,8 +1,4 @@
 import { unified, type Processor } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkStringify from 'remark-stringify';
-import rehypeParse from 'rehype-parse';
-import rehypeRemark from 'rehype-remark';
 import type { Root } from 'mdast';
 import type { MdastPlugin, ConvertResult, MdastAsset, MdastFormatDefinition } from './types';
 
@@ -15,7 +11,7 @@ import { normalizeDirectivePlugin } from './plugins/normalize-directive';
 import { normalizeTableSpanPlugin } from './plugins/normalize-table-span';
 import { extractCodeMetaPlugin } from './plugins/extract-code-meta';
 import { imageSizePlugin } from './plugins/image-size';
-import { normalizeInlineStyles } from './plugins/normalize-inline-styles';
+import { inlineStylesPlugin } from './plugins/normalize-inline-styles';
 
 /**
  * Fluent processor for mdast transformations.
@@ -24,16 +20,15 @@ import { normalizeInlineStyles } from './plugins/normalize-inline-styles';
 export class FluentProcessor {
   /** Map of registered format definitions */
   static formats: Record<string, MdastFormatDefinition> = {
-    markdown: {
-      parse: (p) => p.use(remarkParse).use(markdownFormat),
-      stringify: (p) => p.use(remarkStringify).use(markdownFormat),
-    },
-    html: {
-      parse: (p) => p.use(rehypeParse).use(rehypeRemark),
-      stringify: (p) => p.use(htmlFormat),
-    },
+    markdown: markdownFormat,
+    html: htmlFormat,
     ast: {
-      parse: (p) => { },
+      parse: (p) => {
+        p.Parser = (text: string) => JSON.parse(text);
+      },
+      stringify: (p) => {
+        p.Compiler = (node: any) => node;
+      },
     },
   };
 
@@ -65,7 +60,7 @@ export class FluentProcessor {
     this.use(normalizeTableSpanPlugin);
     this.use(extractCodeMetaPlugin);
     this.use(imageSizePlugin);
-    this.use(normalizeInlineStyles);
+    this.use(inlineStylesPlugin);
   }
 
   /**
@@ -109,10 +104,13 @@ export class FluentProcessor {
       inputFormatDef.parse(this.processor);
     }
 
-    // 2. Parse
+    // 2. Parse & Transform to mdast
     let tree = (typeof this.input === 'string'
       ? this.processor.parse(this.input)
       : this.input) as Root;
+
+    // Run transformers (like rehype-remark) added to this.processor
+    tree = await this.processor.run(tree) as Root;
 
     // 3. Inject global data into tree
     tree.data = { ...tree.data, ...this.globalData };
@@ -141,7 +139,7 @@ export class FluentProcessor {
     }
     if (format === 'markdown' && !outputFormatDef) {
       // fallback if somehow removed
-      outputProcessor.use(remarkStringify).use(markdownFormat);
+      markdownFormat.stringify!(outputProcessor);
     }
 
     // 6. Finalize (compile)
@@ -173,6 +171,15 @@ export class FluentProcessor {
   async toHTML(): Promise<string> {
     const result = await this.to('html');
     return result.content;
+  }
+
+  /**
+   * Helper to get the processed mdast tree.
+   * @returns A promise resolving to the mdast Root node
+   */
+  async toAST(): Promise<Root> {
+    const result = await this.to('ast');
+    return result.content as any;
   }
 }
 

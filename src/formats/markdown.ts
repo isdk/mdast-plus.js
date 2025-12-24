@@ -1,13 +1,16 @@
+import remarkParse from 'remark-parse';
+import remarkStringify from 'remark-stringify';
 import remarkGfm from 'remark-gfm';
 import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 import remarkFrontmatter from 'remark-frontmatter';
+import { inlineStylesToMarkdownHandlers } from '../plugins/normalize-inline-styles';
+import type { MdastFormatDefinition } from '../types';
 
 /**
- * Unified plugin/configuration for Markdown format.
- * Includes GFM, directives, math, and frontmatter.
+ * Common remark configuration for Markdown.
  */
-export function markdownFormat(this: any) {
+export function markdownCommon(this: any) {
   const data = this.data();
 
   function add(key: string, value: any) {
@@ -19,17 +22,7 @@ export function markdownFormat(this: any) {
   }
 
   add('toMarkdownExtensions', {
-    handlers: {
-      mark(node: any, _: any, state: any) {
-        return '==' + state.containerPhrasing(node, { before: '==', after: '==' }) + '==';
-      },
-      sub(node: any, _: any, state: any) {
-        return '~' + state.containerPhrasing(node, { before: '~', after: '~' }) + '~';
-      },
-      sup(node: any, _: any, state: any) {
-        return '^' + state.containerPhrasing(node, { before: '^', after: '^' }) + '^';
-      },
-    },
+    handlers: inlineStylesToMarkdownHandlers,
   });
 
   this
@@ -38,3 +31,12 @@ export function markdownFormat(this: any) {
     .use(remarkMath)
     .use(remarkFrontmatter, ['yaml', 'toml']);
 }
+
+/**
+ * Markdown format definition for FluentProcessor.
+ * Handles both parsing (Markdown -> MDAST) and stringifying (MDAST -> Markdown).
+ */
+export const markdownFormat: MdastFormatDefinition = {
+  parse: (p) => p.use(remarkParse).use(markdownCommon),
+  stringify: (p) => p.use(remarkStringify).use(markdownCommon),
+};

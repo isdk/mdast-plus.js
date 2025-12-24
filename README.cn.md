@@ -17,6 +17,7 @@
   - **表格跨行/跨列**: 支持 HTML 输出中的 `rowspan` 和 `colspan`。
   - **代码元数据**: 对代码块元数据字符串进行结构化解析。
   - **图片尺寸**: 支持 URL 糖语法 (例如 `image.png#=500x300`) 来设置图片尺寸。
+  - **行内样式**: 内置对 `==高亮==`、`~下标~` 和 `^上标^` 的支持。
 - **深度类型支持**: 基于 TypeScript 构建，完整支持 unist/mdast 的模块扩充。
 
 ## 安装
@@ -44,6 +45,13 @@ const html = await mdast(':::warning[重要提示]\n请小心！\n:::')
 ```typescript
 const html = await mdast('![Cat](cat.png#=500x300)').toHTML();
 // 结果: <img src="cat.png" alt="Cat" width="500" height="300">
+```
+
+### AST 输出
+
+```typescript
+const ast = await mdast('==高亮内容==').toAST();
+// 返回 mdast Root 对象
 ```
 
 ### 高级工作流
@@ -99,6 +107,7 @@ const result = await mdast('Hello').to('reverse');
 | `normalize-table-span` | normalize | 将表格单元格跨度迁移到 `hProperties`。 |
 | `extract-code-meta` | normalize | 从代码块元数据中解析 `title="foo"`。 |
 | `image-size` | normalize | 从图片 URL 中解析 `#=WxH`。 |
+| `normalize-inline-styles` | normalize | 标准化 `==mark==`、`~sub~` 和 `^sup^`。 |
 
 ## 贡献
 

@@ -86,3 +86,27 @@ describe('Compliance Fixtures', () => {
     expect(md).toContain('^10^');
   });
 });
+
+describe('AST format support', () => {
+  it('should convert Markdown to AST object', async () => {
+    const ast = await mdast('# Title').toAST();
+    expect(ast.type).toBe('root');
+    expect(ast.children[0].type).toBe('heading');
+  });
+
+  it('should parse AST from JSON string', async () => {
+    const json = JSON.stringify({
+      type: 'root',
+      children: [{ type: 'paragraph', children: [{ type: 'text', value: 'Hello' }] }]
+    });
+    const md = await mdast(json).from('ast').toMarkdown();
+    expect(md.trim()).toBe('Hello');
+  });
+
+  it('should run plugins when outputting AST', async () => {
+    const ast = await mdast('==marked==').toAST();
+    // Verify that normalizeInlineStyles plugin ran
+    const p = ast.children[0] as any;
+    expect(p.children[0].type).toBe('mark');
+  });
+});
