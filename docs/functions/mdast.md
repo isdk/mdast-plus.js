@@ -8,7 +8,7 @@
 
 > **mdast**(`input`): [`FluentProcessor`](../classes/FluentProcessor.md)
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:184](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/pipeline.ts#L184)
+Defined in: [packages/mdast-plus/src/pipeline.ts:191](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/pipeline.ts#L191)
 
 Entry point for the fluent mdast-plus API.
 

@@ -6,7 +6,7 @@
 
 # Interface: MdastPlugin
 
-Defined in: [packages/mdast-plus/src/types.ts:13](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L13)
+Defined in: [packages/mdast-plus/src/types.ts:13](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L13)
 
 Definition for an mdast plugin.
 
@@ -16,7 +16,7 @@ Definition for an mdast plugin.
 
 > **name**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:15](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L15)
+Defined in: [packages/mdast-plus/src/types.ts:15](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L15)
 
 Plugin name
 
@@ -26,7 +26,7 @@ Plugin name
 
 > `optional` **order**: `number`
 
-Defined in: [packages/mdast-plus/src/types.ts:19](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L19)
+Defined in: [packages/mdast-plus/src/types.ts:19](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L19)
 
 Execution order within the stage (lower numbers run first)
 
@@ -36,7 +36,7 @@ Execution order within the stage (lower numbers run first)
 
 > `optional` **stage**: [`Stage`](../type-aliases/Stage.md)
 
-Defined in: [packages/mdast-plus/src/types.ts:17](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L17)
+Defined in: [packages/mdast-plus/src/types.ts:17](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L17)
 
 Processing stage the plugin belongs to
 
@@ -46,7 +46,7 @@ Processing stage the plugin belongs to
 
 > **transform**: (`tree`, `ctx`) => `void` \| `Promise`\<`void`\>
 
-Defined in: [packages/mdast-plus/src/types.ts:21](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L21)
+Defined in: [packages/mdast-plus/src/types.ts:21](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L21)
 
 Transformation function
 

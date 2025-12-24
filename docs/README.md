@@ -21,6 +21,7 @@ English | [简体中文](_media/README.cn.md) | [GitHub](https://github.com/isdk
   - **Table Spans**: Support for `rowspan` and `colspan` in HTML output.
   - **Code Meta**: Structured parsing of code block metadata strings.
   - **Image Sizing**: URL "sugar" support (e.g., `image.png#=500x300`) for image dimensions.
+  - **Inline Styles**: Built-in support for `==Highlight==`, `~Subscript~`, and `^Superscript^`.
 - **Deeply Typed**: Built on TypeScript with full support for unist/mdast module augmentation.
 
 ## Installation
@@ -48,6 +49,13 @@ const html = await mdast(':::warning[Special Note]\nBe careful!\n:::')
 ```typescript
 const html = await mdast('![Cat](cat.png#=500x300)').toHTML();
 // Result: <img src="cat.png" alt="Cat" width="500" height="300">
+```
+
+### AST Output
+
+```typescript
+const ast = await mdast('==Highlighted==').toAST();
+// Returns the mdast Root object
 ```
 
 ### Advanced Pipeline
@@ -103,6 +111,7 @@ Plugins are executed based on their `stage` and `order`:
 | `normalize-table-span` | normalize | Migrates table cell spans to `hProperties`. |
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
+| `normalize-inline-styles` | normalize | Standardizes `==mark==`, `~sub~`, and `^sup^`. |
 
 ## Contributing
 

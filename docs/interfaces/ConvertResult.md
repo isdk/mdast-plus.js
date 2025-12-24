@@ -6,7 +6,7 @@
 
 # Interface: ConvertResult\<T\>
 
-Defined in: [packages/mdast-plus/src/types.ts:50](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L50)
+Defined in: [packages/mdast-plus/src/types.ts:50](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L50)
 
 Result of a conversion process.
 
@@ -24,7 +24,7 @@ The type of the main content (default: string)
 
 > **assets**: [`MdastAsset`](MdastAsset.md)[]
 
-Defined in: [packages/mdast-plus/src/types.ts:54](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L54)
+Defined in: [packages/mdast-plus/src/types.ts:54](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L54)
 
 Extracted assets
 
@@ -34,6 +34,6 @@ Extracted assets
 
 > **content**: `T`
 
-Defined in: [packages/mdast-plus/src/types.ts:52](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L52)
+Defined in: [packages/mdast-plus/src/types.ts:52](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L52)
 
 The converted content

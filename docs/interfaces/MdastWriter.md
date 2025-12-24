@@ -6,7 +6,7 @@
 
 # Interface: MdastWriter\<Output\>
 
-Defined in: [packages/mdast-plus/src/types.ts:154](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L154)
+Defined in: [packages/mdast-plus/src/types.ts:154](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L154)
 
 Interface for writing an mdast tree to an output format.
 
@@ -24,7 +24,7 @@ Output type (default: string)
 
 > **write**(`tree`, `assets?`): `Promise`\<[`ConvertResult`](ConvertResult.md)\<`Output`\>\>
 
-Defined in: [packages/mdast-plus/src/types.ts:160](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L160)
+Defined in: [packages/mdast-plus/src/types.ts:160](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L160)
 
 Writes the mdast tree to the target output.
 

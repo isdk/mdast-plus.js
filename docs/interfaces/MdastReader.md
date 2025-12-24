@@ -6,7 +6,7 @@
 
 # Interface: MdastReader\<I\>
 
-Defined in: [packages/mdast-plus/src/types.ts:131](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L131)
+Defined in: [packages/mdast-plus/src/types.ts:131](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L131)
 
 Interface for reading input into an mdast tree.
 
@@ -24,7 +24,7 @@ Input type
 
 > **read**(`input`): `Promise`\<`Root`\>
 
-Defined in: [packages/mdast-plus/src/types.ts:136](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L136)
+Defined in: [packages/mdast-plus/src/types.ts:136](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L136)
 
 Reads input and returns an mdast Root node.
 

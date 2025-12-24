@@ -6,7 +6,7 @@
 
 # Interface: MdastDataOrigin
 
-Defined in: [packages/mdast-plus/src/types.ts:60](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L60)
+Defined in: [packages/mdast-plus/src/types.ts:60](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L60)
 
 Original metadata for a node.
 
@@ -20,7 +20,7 @@ Original metadata for a node.
 
 > **format**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:62](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L62)
+Defined in: [packages/mdast-plus/src/types.ts:62](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L62)
 
 Source format
 
@@ -30,7 +30,7 @@ Source format
 
 > `optional` **hash**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:66](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L66)
+Defined in: [packages/mdast-plus/src/types.ts:66](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L66)
 
 Hash of the source content
 
@@ -40,6 +40,6 @@ Hash of the source content
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/mdast-plus/src/types.ts:64](https://github.com/isdk/mdast-plus.js/blob/c94d215035e579925cf60814f0a5c05c543ca784/src/types.ts#L64)
+Defined in: [packages/mdast-plus/src/types.ts:64](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L64)
 
 Raw data from the source

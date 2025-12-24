@@ -26,8 +26,13 @@
 
 - [Stage](type-aliases/Stage.md)
 
+## Variables
+
+- [htmlFormat](variables/htmlFormat.md)
+- [markdownFormat](variables/markdownFormat.md)
+
 ## Functions
 
-- [htmlFormat](functions/htmlFormat.md)
-- [markdownFormat](functions/markdownFormat.md)
+- [htmlStringify](functions/htmlStringify.md)
+- [markdownCommon](functions/markdownCommon.md)
 - [mdast](functions/mdast.md)
