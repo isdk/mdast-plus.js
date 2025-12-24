@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.2](https://github.com/isdk/mdast-plus.js/compare/v0.1.1...v0.1.2) (2025-12-24)
+
+
+### Features
+
+* add support for mark/sub/sup and improve format definitions ([1717131](https://github.com/isdk/mdast-plus.js/commit/17171317517e8b597723295887b17363126f3e23))
+* use shell-quote to parse code meta string ([75ee549](https://github.com/isdk/mdast-plus.js/commit/75ee549d3fb31ef4bc1b4a6b3307f6368072874e))
+
 ## 0.1.1 (2025-12-24)
 
 
