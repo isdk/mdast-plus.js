@@ -118,9 +118,10 @@ export class FluentProcessor {
     // 4. Staged Transform
     const sortedPlugins = [...this.plugins].sort((a, b) => {
       const stages: Record<string, number> = { normalize: 0, compile: 1, finalize: 2 };
-      if (a.stage !== b.stage) {
-        const aStage = a.stage || 'normalize';
-        const bStage = b.stage || 'normalize';
+      const aStage = a.stage || 'normalize';
+      const bStage = b.stage || 'normalize';
+
+      if (aStage !== bStage) {
         return stages[aStage] - stages[bStage];
       }
       return (a.order || 0) - (b.order || 0);

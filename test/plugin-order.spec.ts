@@ -67,6 +67,30 @@ describe('Plugin Stage and Order', () => {
     ]);
   });
 
+  it('should correctly sort implicit (undefined) stage and explicit "normalize" stage', async () => {
+    const executionOrder: string[] = [];
+    const createP = (name: string, stage?: any, order?: number): MdastPlugin => ({
+      name, stage, order, transform: () => { executionOrder.push(name); }
+    });
+
+    // Bug regression: implicit stage (undefined) vs explicit 'normalize'
+    // should still be sorted by order within the same stage.
+    await mdast('# test')
+      .use(createP('explicit-1', 'normalize', 1))
+      .use(createP('implicit-2', undefined, 2))
+      .use(createP('explicit-0', 'normalize', 0))
+      .use(createP('implicit-1', undefined, 1))
+      .toHTML();
+
+    const filtered = executionOrder.filter(n => n.includes('implicit') || n.includes('explicit'));
+    expect(filtered).toEqual([
+      'explicit-0',
+      'explicit-1',
+      'implicit-1',
+      'implicit-2'
+    ]);
+  });
+
   it('should place default plugins correctly in the execution flow', async () => {
     const executionOrder: string[] = [];
 
