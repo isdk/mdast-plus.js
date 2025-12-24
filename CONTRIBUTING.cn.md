@@ -87,6 +87,8 @@ FluentProcessor.registerFormat('json', {
 });
 ```
 
+> **注意**: 格式名称不区分大小写。
+
 ## 编码规范
 
 - 所有新代码必须使用 **TypeScript**。

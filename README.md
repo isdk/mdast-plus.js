@@ -81,6 +81,8 @@ FluentProcessor.registerFormat('reverse', {
 const result = await mdast('Hello').to('reverse');
 ```
 
+> **Note**: Format names are case-insensitive (always converted to lowercase internally).
+
 ## Staged Processing
 
 Plugins are executed based on their `stage` and `order`:

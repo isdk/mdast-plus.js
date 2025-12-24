@@ -87,6 +87,8 @@ FluentProcessor.registerFormat('json', {
 });
 ```
 
+> **Note**: Format names are case-insensitive.
+
 ## Coding Standards
 
 - Use **TypeScript** for all new code.

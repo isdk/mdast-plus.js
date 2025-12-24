@@ -81,6 +81,8 @@ FluentProcessor.registerFormat('reverse', {
 const result = await mdast('Hello').to('reverse');
 ```
 
+> **注意**: 格式名称不区分大小写（内部始终转换为小写）。
+
 ## 分阶段处理
 
 插件根据它们的 `stage` (阶段) 和 `order` (顺序) 执行：

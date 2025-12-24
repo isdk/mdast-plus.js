@@ -43,7 +43,7 @@ export class FluentProcessor {
    * @param definition - The format definition containing parse/stringify logic
    */
   static registerFormat(name: string, definition: MdastFormatDefinition) {
-    FluentProcessor.formats[name] = definition;
+    FluentProcessor.formats[name.toLowerCase()] = definition;
   }
 
   private processor: Processor;
@@ -73,7 +73,7 @@ export class FluentProcessor {
    * @param format - The input format name (default: 'markdown')
    */
   from(format: string): this {
-    this.inputFormat = format;
+    this.inputFormat = format.toLowerCase();
     return this;
   }
 
@@ -101,6 +101,8 @@ export class FluentProcessor {
    * @returns A promise resolving to the conversion result (content and assets)
    */
   async to(format: string): Promise<ConvertResult> {
+    format = format.toLowerCase();
+
     // 1. Setup Input Parser
     const inputFormatDef = FluentProcessor.formats[this.inputFormat];
     if (inputFormatDef?.parse) {
