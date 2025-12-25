@@ -11,11 +11,29 @@ describe('mdast-plus fluent API', () => {
     const md = await mdast('# Hello').toMarkdown();
     expect(md.trim()).toBe('# Hello');
   });
+
+  it('should pass rehype options for parsing (fragment: false)', async () => {
+    const input = '<div>root1</div><div>root2</div>';
+    const ast: any = await mdast(input, { html: { fragment: false } }).from('html').toAST();
+    // Expect the AST to represent a full HTML document structure
+    expect(ast.type).toBe('root');
+    expect(ast.children[0].type).toBe('element');
+    expect(ast.children[0].tagName).toBe('html');
+    const htmlChildren = ast.children[0].children as any[];
+    expect(htmlChildren[1].tagName).toBe('body'); // Should have head and body
+    const bodyChildren = htmlChildren[1].children as any[];
+    expect(bodyChildren[0].tagName).toBe('div');
+    expect(bodyChildren[0].children[0].value).toBe('root1'); // Check text content
+    expect(bodyChildren[1].tagName).toBe('div');
+    expect(bodyChildren[1].children[0].value).toBe('root2')
+  });
 });
 
 describe('Compliance Fixtures', () => {
   it('F1: Admonition title normalization', async () => {
-    const input = `:::warning[注意]\n请小心\n:::`;
+    const input = `:::warning[注意]
+请小心
+:::`;
     const html = await mdast(input).toHTML();
     expect(html).toContain('title="注意"');
     expect(html).toContain('warning');
@@ -59,7 +77,9 @@ describe('Compliance Fixtures', () => {
   });
 
   it('F6: Code meta extraction', async () => {
-    const input = '```mermaid title="架构图"\ngraph TD; A-->B;\n```';
+    const input = `\`\`\`mermaid title="架构图"
+graph TD; A-->B;
+\`\`\``;
     // We expect the meta to be parsed. Testing toHTML might not show meta unless custom rendered,
     // so we can test the data injection if we had a way to inspect the tree.
     // For now, verify it doesn't crash and renders standard code block.

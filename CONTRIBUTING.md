@@ -81,6 +81,9 @@ export const myPlugin: MdastPlugin = {
 import { FluentProcessor } from '../pipeline';
 
 FluentProcessor.registerFormat('json', {
+  // Optional: Whether the format needs to run transformers to convert to mdast.
+  // Defaults to true. Set to false if the parsed result is already a standard mdast.
+  needsTransformToMdast: false,
   stringify: (processor) => {
     processor.Compiler = (tree) => JSON.stringify(tree);
   }

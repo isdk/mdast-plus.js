@@ -1,6 +1,12 @@
 import { unified, type Processor } from 'unified';
 import type { Root } from 'mdast';
-import type { MdastPlugin, ConvertResult, MdastAsset, MdastFormatDefinition } from './types';
+import type {
+  MdastPlugin,
+  ConvertResult,
+  MdastAsset,
+  MdastFormatDefinition,
+  MdastPlusOptions,
+} from './types';
 
 // Default Formats
 import { markdownFormat } from './formats/markdown';
@@ -23,6 +29,7 @@ export class FluentProcessor {
     markdown: markdownFormat,
     html: htmlFormat,
     ast: {
+      needsTransformToMdast: false,
       parse: (p) => {
         p.Parser = (text: string) => JSON.parse(text);
       },
@@ -46,13 +53,18 @@ export class FluentProcessor {
   private inputFormat: string = 'markdown';
   private plugins: MdastPlugin[] = [];
   private globalData: Record<string, any> = {};
+  private _options: MdastPlusOptions = {};
 
   /**
    * Creates a new FluentProcessor instance.
    * @param input - The input content (string or mdast tree)
+   * @param options - The options for mdast-plus
    */
-  constructor(input: any) {
+  constructor(input: any, options?: MdastPlusOptions) {
     this.input = input;
+    if (options) {
+      this._options = options;
+    }
     this.processor = unified();
 
     // Core Normalization Plugins (Default)
@@ -91,6 +103,20 @@ export class FluentProcessor {
   }
 
   /**
+   * Merges options into the processor.
+   * @param options - The options for mdast-plus
+   */
+  options(options: MdastPlusOptions): this {
+    this._options = {
+      ...this._options,
+      ...options,
+      markdown: { ...this._options?.markdown, ...options?.markdown },
+      html: { ...this._options?.html, ...options?.html },
+    };
+    return this;
+  }
+
+  /**
    * Converts the input content to the specified format.
    * @param format - The output format name
    * @returns A promise resolving to the conversion result (content and assets)
@@ -99,18 +125,25 @@ export class FluentProcessor {
     format = format.toLowerCase();
 
     // 1. Setup Input Parser
+    const inputProcessor = unified();
     const inputFormatDef = FluentProcessor.formats[this.inputFormat];
     if (inputFormatDef?.parse) {
-      inputFormatDef.parse(this.processor);
+      inputFormatDef.parse(inputProcessor, this._options);
     }
 
     // 2. Parse & Transform to mdast
     let tree = (typeof this.input === 'string'
-      ? this.processor.parse(this.input)
+      ? inputProcessor.parse(this.input)
       : this.input) as Root;
 
-    // Run transformers (like rehype-remark) added to this.processor
-    tree = await this.processor.run(tree) as Root;
+    const needsRun = inputFormatDef.needsTransformToMdast !== false; // default to true
+    const isAstOutput = format === 'ast';
+
+    // Run transformers if the format definition requires it (e.g., for HAST -> MDAST),
+    // but skip it if the user just wants the intermediate AST for debugging/testing.
+    if (needsRun && !isAstOutput) {
+      tree = await inputProcessor.run(tree) as Root;
+    }
 
     // 3. Inject global data into tree
     tree.data = { ...tree.data, ...this.globalData };
@@ -135,11 +168,11 @@ export class FluentProcessor {
     const outputProcessor = unified().data('settings', this.processor.data('settings'));
     const outputFormatDef = FluentProcessor.formats[format];
     if (outputFormatDef?.stringify) {
-      outputFormatDef.stringify(outputProcessor);
+      outputFormatDef.stringify(outputProcessor, this._options);
     }
     if (format === 'markdown' && !outputFormatDef) {
       // fallback if somehow removed
-      markdownFormat.stringify!(outputProcessor);
+      markdownFormat.stringify!(outputProcessor, this._options);
     }
 
     // 6. Finalize (compile)
@@ -186,8 +219,9 @@ export class FluentProcessor {
 /**
  * Entry point for the fluent mdast-plus API.
  * @param input - The input content (string or mdast tree)
+ * @param options - The options for mdast-plus
  * @returns A FluentProcessor instance
  */
-export function mdast(input: any): FluentProcessor {
-  return new FluentProcessor(input);
+export function mdast(input: any, options?: MdastPlusOptions): FluentProcessor {
+  return new FluentProcessor(input, options);
 }

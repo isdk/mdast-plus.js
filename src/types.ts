@@ -22,13 +22,34 @@ export interface MdastPlugin {
 }
 
 /**
+ * Options for `mdast-plus` processor.
+ * Assumes that all plugins for a given format (e.g., markdown)
+ * have unique option keys.
+ */
+export interface MdastPlusOptions {
+  /**
+   * A bag of options for all markdown-related plugins (remark-parse, remark-gfm, etc.).
+   */
+  markdown?: Record<string, any>;
+  /**
+   * A bag of options for all HTML-related plugins (rehype-parse, rehype-remark, etc.).
+   */
+  html?: Record<string, any>;
+}
+
+/**
  * Definition for an mdast format (parser/stringifier).
  */
 export interface MdastFormatDefinition {
+  /**
+   * Flag indicating whether the format needs a transform to mdast.
+   * defaults to true.
+   */
+  needsTransformToMdast?: boolean;
   /** Function to register parser plugins */
-  parse?: (processor: any) => void;
+  parse?: (processor: any, options?: MdastPlusOptions) => void;
   /** Function to register stringifier plugins */
-  stringify?: (processor: any) => void;
+  stringify?: (processor: any, options?: MdastPlusOptions) => void;
 }
 
 /**
@@ -144,7 +165,7 @@ export interface MdastTransformer {
    * Transforms the given mdast tree.
    * @param tree - The Root node to transform
    */
-  transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
+   transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
 }
 
 /**

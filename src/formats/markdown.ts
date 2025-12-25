@@ -5,12 +5,12 @@ import remarkDirective from 'remark-directive';
 import remarkMath from 'remark-math';
 import remarkFrontmatter from 'remark-frontmatter';
 import { inlineStylesToMarkdownHandlers } from '../plugins/normalize-inline-styles';
-import type { MdastFormatDefinition } from '../types';
+import type { MdastFormatDefinition, MdastPlusOptions } from '../types';
 
 /**
  * Common remark configuration for Markdown.
  */
-export function markdownCommon(this: any) {
+export function markdownCommon(this: any, options?: Record<string, any>) {
   const data = this.data();
 
   function add(key: string, value: any) {
@@ -26,9 +26,10 @@ export function markdownCommon(this: any) {
   });
 
   this
-    .use(remarkGfm, { singleTilde: false })
-    .use(remarkDirective)
-    .use(remarkMath)
+    .use(remarkGfm, { singleTilde: false, ...options })
+    .use(remarkDirective, options)
+    .use(remarkMath, options)
+    // remarkFrontmatter has a different options signature, so we don't pass the whole bag.
     .use(remarkFrontmatter, ['yaml', 'toml']);
 }
 
@@ -37,6 +38,8 @@ export function markdownCommon(this: any) {
  * Handles both parsing (Markdown -> MDAST) and stringifying (MDAST -> Markdown).
  */
 export const markdownFormat: MdastFormatDefinition = {
-  parse: (p) => p.use(remarkParse).use(markdownCommon),
-  stringify: (p) => p.use(remarkStringify).use(markdownCommon),
+  needsTransformToMdast: false,
+  // Logical order: use the parser, then add plugins that extend it.
+  parse: (p, options) => p.use(remarkParse, options?.markdown).use(markdownCommon, options?.markdown),
+  stringify: (p, options) => p.use(remarkStringify, options?.markdown).use(markdownCommon, options?.markdown),
 };

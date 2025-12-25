@@ -81,6 +81,9 @@ export const myPlugin: MdastPlugin = {
 import { FluentProcessor } from '../pipeline';
 
 FluentProcessor.registerFormat('json', {
+  // 可选：是否需要执行转换器（transformer）以转换为 mdast。
+  // 默认为 true。如果解析结果已经是标准的 mdast 且不需要进一步处理，可以设为 false。
+  needsTransformToMdast: false,
   stringify: (processor) => {
     processor.Compiler = (tree) => JSON.stringify(tree);
   }
