@@ -79,6 +79,24 @@ const { content, assets } = await mdast(myInput)
   .to('html');
 ```
 
+### Plugin Behavior
+
+`mdast-plus` uses [unified](https://github.com/unifiedjs/unified) internally. If you add the same plugin function multiple times, the last configuration **overrides** the previous ones.
+
+```typescript
+// The plugin will run ONCE with option: 2
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin, { option: 2 });
+```
+
+To run the same plugin logic multiple times (e.g., for different purposes), provide a distinct function reference:
+
+```typescript
+// The plugin will run TWICE
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin.bind({}), { option: 2 });
+```
+
 ### Arbitrary Formats
 
 You can register custom input or output formats:

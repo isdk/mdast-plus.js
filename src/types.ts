@@ -31,6 +31,12 @@ export type PipelineStageName = keyof typeof PipelineStage;
  * It wraps a standard unified plugin with execution metadata.
  */
 export interface MdastPlugin {
+  /**
+   * Optional name for the plugin. 
+   * Used for identification in overrides and logging.
+   * If not provided, defaults to the plugin function's name.
+   */
+  name?: string;
   /** The standard unified plugin (attacher) function. */
   plugin: Plugin<any[], any, any>;
   /**

@@ -79,9 +79,9 @@ export class MdastBasePipeline {
 
   /**
    * Normalizes a plugin entry for runtime execution.
-   * @private
+   * @protected
    */
-  private toRuntimeEntry(
+  protected toRuntimeEntry(
     entry: MdastPlugin,
     defaultStage: PipelineStage,
     overrides?: Record<string, any>
@@ -96,19 +96,51 @@ export class MdastBasePipeline {
     }
 
     let options = entry.options || [];
-    if (overrides && entry.plugin.name) {
-        if (entry.plugin.name in overrides) {
-            const override = overrides[entry.plugin.name];
+    // Prefer explicit name, fall back to function name
+    const pluginName = entry.name || entry.plugin.name;
+
+    if (overrides && pluginName) {
+        if (pluginName in overrides) {
+            const override = overrides[pluginName];
             options = Array.isArray(override) ? override : [override];
         }
     }
 
     return {
+      name: pluginName,
       plugin: entry.plugin,
       options,
       stage,
       order: entry.order || 0
     };
+  }
+
+  /**
+   * Ensures that input plugins (parser, normalizers) are present in the queue.
+   * Adds implicit plugins if no parser is detected.
+   * @protected
+   */
+  protected ensureInputPlugins(queue: MdastPlugin[], overrides?: Record<string, any>, maxStage: PipelineStage = PipelineStage.stringify) {
+     const hasParser = queue.some(p => (p.stage ?? DefaultPipelineStage) === PipelineStage.parse);
+     const inputIsNode = isNode(this.input);
+
+     if (!hasParser) {
+        let pluginsToAdd: MdastPlugin[] = [];
+        if (inputIsNode) {
+             const astFormat = MdastBasePipeline.getFormat('ast');
+             if (astFormat && astFormat.input) pluginsToAdd = astFormat.input;
+        } else {
+             const mdFormat = MdastBasePipeline.getFormat('markdown');
+             if (mdFormat && mdFormat.input) pluginsToAdd = mdFormat.input;
+        }
+
+        for (const p of pluginsToAdd) {
+            const runtimeP = this.toRuntimeEntry(p, PipelineStage.parse, overrides);
+            if ((runtimeP.stage ?? DefaultPipelineStage) <= maxStage) {
+                queue.push(runtimeP);
+            }
+        }
+     }
   }
 
   /**
@@ -147,28 +179,7 @@ export class MdastBasePipeline {
     const runQueue = [...this.queue];
 
     // Check implicit input format BEFORE adding output plugins
-    const hasParser = runQueue.some(p => (p.stage ?? DefaultPipelineStage) === PipelineStage.parse);
-    const inputIsNode = isNode(this.input);
-
-    if (!hasParser) {
-        if (inputIsNode) {
-             // Default to AST input plugins for Node input
-             const astFormat = MdastBasePipeline.getFormat('ast');
-             if (astFormat && astFormat.input) {
-                for (const p of astFormat.input) {
-                    runQueue.push(this.toRuntimeEntry(p, PipelineStage.parse, overrides));
-                }
-             }
-        } else {
-            // Default to Markdown for text input
-            const mdFormat = MdastBasePipeline.getFormat('markdown');
-            if (mdFormat && mdFormat.input) {
-               for (const p of mdFormat.input) {
-                  runQueue.push(this.toRuntimeEntry(p, PipelineStage.parse, overrides));
-               }
-            }
-        }
-    }
+    this.ensureInputPlugins(runQueue, overrides);
 
     // 2. Append Output Plugins
     // Output plugins default to the Finalize (300) stage.
@@ -179,7 +190,7 @@ export class MdastBasePipeline {
     // 3. Assemble & Run
     const processor = this.assembleProcessor(runQueue);
 
-    if (inputIsNode) {
+    if (isNode(this.input)) {
         // Input is AST: Skip Parsing. Run transformers then stringify.
         const tree = await processor.run(this.input as any);
         const result = processor.stringify(tree);
@@ -315,37 +326,11 @@ export class MdastPipeline extends MdastBasePipeline {
         order: 0
       });
 
-      // Logic to handle implicit parser / node input
-      const hasParser = runQueue.some(p => (p.stage ?? DefaultPipelineStage) === PipelineStage.parse);
-      const inputIsNode = isNode(this.input);
-
-      if (!hasParser) {
-          if (inputIsNode) {
-               const astFormat = MdastBasePipeline.getFormat('ast');
-               if (astFormat && astFormat.input) {
-                  for (const p of astFormat.input) {
-                    const runtimeP = this.toRuntimeEntry(p, PipelineStage.parse, options.overrides);
-                    if ((runtimeP.stage ?? DefaultPipelineStage) <= targetStage) {
-                         runQueue.push(runtimeP);
-                    }
-                  }
-               }
-          } else {
-              const mdFormat = MdastBasePipeline.getFormat('markdown');
-              if (mdFormat && mdFormat.input) {
-                 for (const p of mdFormat.input) {
-                    const runtimeP = this.toRuntimeEntry(p, PipelineStage.parse, options.overrides);
-                    if ((runtimeP.stage ?? DefaultPipelineStage) <= targetStage) {
-                        runQueue.push(runtimeP);
-                    }
-                 }
-              }
-          }
-      }
+      this.ensureInputPlugins(runQueue, options.overrides, targetStage);
 
       const processor = this.assembleProcessor(runQueue);
 
-      if (inputIsNode) {
+      if (isNode(this.input)) {
           const tree = await processor.run(this.input as any);
           return tree as Root;
       } else {

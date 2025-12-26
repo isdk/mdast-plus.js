@@ -79,6 +79,24 @@ const { content, assets } = await mdast(myInput)
   .to('html');
 ```
 
+### 插件行为
+
+`mdast-plus` 内部使用 [unified](https://github.com/unifiedjs/unified)。如果您多次添加同一个插件函数，最后的配置将**覆盖**之前的配置。
+
+```typescript
+// 插件将只执行一次，且选项为: 2
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin, { option: 2 });
+```
+
+若要多次运行相同的插件逻辑（例如用于不同目的），请提供不同的函数引用：
+
+```typescript
+// 插件将执行两次
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin.bind({}), { option: 2 });
+```
+
 ### 任意格式支持
 
 您可以注册自定义的输入或输出格式：
