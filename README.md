@@ -71,10 +71,14 @@ const rawAst = await mdast('==Highlighted==').toAST({ stage: 'parse' });
 ### Advanced Pipeline
 
 ```typescript
+import { htmlReadabilityPlugins } from '@isdk/mdast-plus';
+
 const vfile = await mdast(myInput)
   .data({ myGlobal: 'value' })
-  // Add a custom plugin at the 'compile' stage
-  .useAt('compile', myPlugin, { option: 1 })
+  // Add multiple plugins as an array at the 'compile' stage
+  .use([pluginA, pluginB])
+  // Or add a set of plugins at a specific stage
+  .useAt('parse', htmlReadabilityPlugins)
   .priority(10) // Run later than default plugins
   .to('html');
 
@@ -150,7 +154,7 @@ Each stage can have one "main" plugin. If a plugin is marked with `main: true`, 
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
 | `normalize-inline-styles` | normalize | Standardizes `==mark==`, `~sub~`, and `^sup^`. |
-| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. |
+| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Use `htmlReadabilityPlugins` array for easier setup. |
 
 ## Contributing
 
