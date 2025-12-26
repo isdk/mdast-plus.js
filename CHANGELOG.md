@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.2.0](https://github.com/isdk/mdast-plus.js/compare/v0.1.3...v0.2.0) (2025-12-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* sync src changes to docs and implement .data() method
+
+### Features
+
+* add html-readability plugin and enhance plugin ordering logic ([5bd3b07](https://github.com/isdk/mdast-plus.js/commit/5bd3b075c866a48ba8414779cc451068212b5e4e))
+* export htmlReadabilityPlugins array for easier usage ([2251836](https://github.com/isdk/mdast-plus.js/commit/2251836f94190267b01803027e94eb70ad4388c0))
+* support plugin array in use and useAt methods ([cc51165](https://github.com/isdk/mdast-plus.js/commit/cc5116529c9abee157c339af471607de2b5533a7))
+* sync src changes to docs and implement .data() method ([9d4d40b](https://github.com/isdk/mdast-plus.js/commit/9d4d40b45f61179cb84914c2446b38b39d4d32c3))
+
+
+### Bug Fixes
+
+* **types:** resolve readability property missing error on AST nodes ([4f90223](https://github.com/isdk/mdast-plus.js/commit/4f90223978cfff7c1a8231bb45677e4d469bb4b8))
+
 ## [0.1.3](https://github.com/isdk/mdast-plus.js/compare/v0.1.2...v0.1.3) (2025-12-26)
 
 
