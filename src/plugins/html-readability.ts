@@ -64,7 +64,7 @@ export const htmlReadability: Plugin<[(ReadabilityOptions | boolean)?], string, 
 
     if (hast) {
       hast.data = hast.data || {};
-      hast.data.readability = metadata;
+      (hast.data as any).readability = metadata;
     }
 
     return hast;

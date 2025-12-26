@@ -119,6 +119,13 @@ declare module 'mdast' {
     hProperties?: Properties;
     /** Source origin information */
     _origin?: MdastDataOrigin;
+    readability?: {
+      title: string;
+      byline: string;
+      excerpt: string;
+      siteName: string;
+      lang: string;
+    };
     [k: string]: any;
   }
 
