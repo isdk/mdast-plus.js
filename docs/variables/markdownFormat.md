@@ -6,9 +6,11 @@
 
 # Variable: markdownFormat
 
-> `const` **markdownFormat**: [`MdastFormatDefinition`](../interfaces/MdastFormatDefinition.md)
+> `const` **markdownFormat**: [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/formats/markdown.ts:39](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/formats/markdown.ts#L39)
+Defined in: [packages/mdast-plus/src/formats/markdown.ts:103](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/formats/markdown.ts#L103)
 
-Markdown format definition for FluentProcessor.
-Handles both parsing (Markdown -> MDAST) and stringifying (MDAST -> Markdown).
+Markdown format definition.
+
+Supports GFM, Directives, Math, and Frontmatter. 
+Provides a bidirectional mapping between Markdown strings and mdast-plus ASTs.

@@ -6,19 +6,33 @@
 
 # Interface: MdastPlugin
 
-Defined in: [packages/mdast-plus/src/types.ts:13](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L13)
+Defined in: [packages/mdast-plus/src/types.ts:33](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L33)
 
-Definition for an mdast plugin.
+Configuration for a plugin within the mdast-plus pipeline.
+It wraps a standard unified plugin with execution metadata.
 
 ## Properties
 
-### name
+### name?
 
-> **name**: `string`
+> `optional` **name**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:15](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L15)
+Defined in: [packages/mdast-plus/src/types.ts:39](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L39)
 
-Plugin name
+Optional name for the plugin.
+Used for identification in overrides and logging.
+If not provided, defaults to the plugin function's name.
+
+***
+
+### options?
+
+> `optional` **options**: `any`[]
+
+Defined in: [packages/mdast-plus/src/types.ts:46](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L46)
+
+Arguments passed to the plugin.
+MUST be an array of arguments (e.g., [optionsObject]).
 
 ***
 
@@ -26,40 +40,26 @@ Plugin name
 
 > `optional` **order**: `number`
 
-Defined in: [packages/mdast-plus/src/types.ts:19](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L19)
+Defined in: [packages/mdast-plus/src/types.ts:50](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L50)
 
-Execution order within the stage (lower numbers run first)
+Execution priority within the same stage. Lower values run earlier.
+
+***
+
+### plugin
+
+> **plugin**: `Plugin`\<`any`[], `any`, `any`\>
+
+Defined in: [packages/mdast-plus/src/types.ts:41](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L41)
+
+The standard unified plugin (attacher) function.
 
 ***
 
 ### stage?
 
-> `optional` **stage**: [`Stage`](../type-aliases/Stage.md)
+> `optional` **stage**: [`PipelineStage`](../enumerations/PipelineStage.md) \| `"parse"` \| `"normalize"` \| `"compile"` \| `"finalize"` \| `"stringify"`
 
-Defined in: [packages/mdast-plus/src/types.ts:17](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L17)
+Defined in: [packages/mdast-plus/src/types.ts:48](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L48)
 
-Processing stage the plugin belongs to
-
-***
-
-### transform()
-
-> **transform**: (`tree`, `ctx`) => `void` \| `Promise`\<`void`\>
-
-Defined in: [packages/mdast-plus/src/types.ts:21](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L21)
-
-Transformation function
-
-#### Parameters
-
-##### tree
-
-`Root`
-
-##### ctx
-
-`any`
-
-#### Returns
-
-`void` \| `Promise`\<`void`\>
+The stage in which this plugin should run.

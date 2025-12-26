@@ -6,9 +6,9 @@
 
 # Interface: MdastSub
 
-Defined in: [packages/mdast-plus/src/types.ts:81](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L81)
+Defined in: [packages/mdast-plus/src/types.ts:93](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L93)
 
-mdast node for subscript text.
+Represents a subscript text node in mdast.
 
 ## Extends
 
@@ -20,7 +20,7 @@ mdast node for subscript text.
 
 > **children**: `PhrasingContent`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:83](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L83)
+Defined in: [packages/mdast-plus/src/types.ts:95](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L95)
 
 List of children.
 
@@ -65,7 +65,7 @@ have a position.
 
 > **type**: `"sub"`
 
-Defined in: [packages/mdast-plus/src/types.ts:82](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L82)
+Defined in: [packages/mdast-plus/src/types.ts:94](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L94)
 
 Node type.
 

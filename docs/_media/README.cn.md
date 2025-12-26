@@ -11,7 +11,7 @@
 ## 特性
 
 - **Fluent API**: 链式调用接口 `mdast(input).use(plugin).toHTML()`。
-- **分阶段插件**: 将转换组织为 `normalize`、`compile` 和 `finalize` 阶段，支持优先级排序。
+- **分阶段插件**: 将转换组织为 `parse`, `normalize`, `compile`, `finalize` 和 `stringify` 阶段。
 - **语义化规范**:
   - **指令 (Directives)**: 规范化提示框 (Admonition) 名称并从标签中提取标题。
   - **表格跨行/跨列**: 支持 HTML 输出中的 `rowspan` 和 `colspan`。
@@ -40,6 +40,17 @@ const html = await mdast(':::warning[重要提示]\n请小心！\n:::')
 // 结果: <div title="重要提示" class="warning"><p>请小心！</p></div>
 ```
 
+### 配置输入选项
+
+您可以通过 `.from()` 的第二个参数向输入插件（如 `remark-gfm` 或 `remark-parse`）传递选项：
+
+```typescript
+// 启用单个波浪线删除线 (~text~)
+const md = await mdast('Hello ~world~')
+  .from('markdown', { remarkGfm: { singleTilde: true } })
+  .toMarkdown();
+```
+
 ### 图片尺寸
 
 ```typescript
@@ -50,8 +61,11 @@ const html = await mdast('![Cat](cat.png#=500x300)').toHTML();
 ### AST 输出
 
 ```typescript
+// 获取处理后的完整 AST (在 normalization 之后)
 const ast = await mdast('==高亮内容==').toAST();
-// 返回 mdast Root 对象
+
+// 获取原始 AST (在 parse 之后, normalization 之前)
+const rawAst = await mdast('==高亮内容==').toAST({ stage: 'parse' });
 ```
 
 ### 高级工作流
@@ -59,14 +73,28 @@ const ast = await mdast('==高亮内容==').toAST();
 ```typescript
 const { content, assets } = await mdast(myInput)
   .data({ myGlobal: 'value' })
-  .use({
-    name: 'my-plugin',
-    stage: 'compile',
-    transform: async (tree) => {
-      // 转换 AST
-    }
-  })
+  // 在 'compile' 阶段添加自定义插件
+  .useAt('compile', myPlugin, { option: 1 })
+  .priority(10) // 比默认插件更晚执行
   .to('html');
+```
+
+### 插件行为
+
+`mdast-plus` 内部使用 [unified](https://github.com/unifiedjs/unified)。如果您多次添加同一个插件函数，最后的配置将**覆盖**之前的配置。
+
+```typescript
+// 插件将只执行一次，且选项为: 2
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin, { option: 2 });
+```
+
+若要多次运行相同的插件逻辑（例如用于不同目的），请提供不同的函数引用：
+
+```typescript
+// 插件将执行两次
+pipeline.use(myPlugin, { option: 1 });
+pipeline.use(myPlugin.bind({}), { option: 2 });
 ```
 
 ### 任意格式支持
@@ -74,16 +102,20 @@ const { content, assets } = await mdast(myInput)
 您可以注册自定义的输入或输出格式：
 
 ```typescript
-import { FluentProcessor, mdast } from '@isdk/mdast-plus';
+import { MdastPipeline, mdast, PipelineStage } from '@isdk/mdast-plus';
 
 // 注册自定义输出格式
-FluentProcessor.registerFormat('reverse', {
-  stringify: (p) => {
-    p.Compiler = (tree) => {
-      // 您的自定义序列化逻辑
-      return '...';
-    };
-  }
+MdastPipeline.register({
+  id: 'reverse',
+  output: [{
+    plugin: function() {
+      this.Compiler = (tree) => {
+        // 您的自定义序列化逻辑
+        return '...';
+      };
+    },
+    stage: PipelineStage.stringify
+  }]
 });
 
 const result = await mdast('Hello').to('reverse');
@@ -95,9 +127,11 @@ const result = await mdast('Hello').to('reverse');
 
 插件根据它们的 `stage` (阶段) 和 `order` (顺序) 执行：
 
-1.  **normalize** (order 0-100): 清理并规范化树。
-2.  **compile** (order 0-100): 高级语义转换。
-3.  **finalize** (order 0-100): 输出前的最后准备。
+1.  **parse** (0): 输入解析 (例如 `remark-parse`)。
+2.  **normalize** (100): 清理并规范化树。
+3.  **compile** (200): 高级语义转换。
+4.  **finalize** (300): 输出前的最后准备 (例如 `rehype-sanitize`)。
+5.  **stringify** (400): 输出生成。
 
 ## 内置核心插件
 

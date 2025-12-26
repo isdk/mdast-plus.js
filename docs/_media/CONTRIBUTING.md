@@ -8,11 +8,13 @@ Thank you for your interest in contributing to `@isdk/mdast-plus`! This document
 
 ### Core Concepts
 
-1.  **Fluent API**: The main entry point is the `mdast()` function in `src/pipeline.ts`.
-2.  **Staged Plugins**: Plugins are categorized into three stages:
+1.  **Fluent API**: The main entry point is the `mdast()` function in `src/pipeline.ts`, backed by `MdastPipeline`.
+2.  **Staged Plugins**: Plugins are categorized into 5 stages (`PipelineStage`):
+    *   `parse`: Parsing input to AST.
     *   `normalize`: Cleanup and canonicalize the tree.
     *   `compile`: High-level semantic transformations.
     *   `finalize`: Final preparation before output.
+    *   `stringify`: Serializing AST to output.
 3.  **Universal Data Protocols**: Nodes use `node.data` for metadata, and `node.data.hProperties` for HTML attributes.
 
 ## Getting Started
@@ -55,39 +57,58 @@ pnpm run lint
 ## Adding a New Plugin
 
 1.  Create your plugin in `src/plugins/`.
-2.  Implement the `MdastPlugin` interface:
+2.  Implement the `MdastPlugin` interface. The `plugin` property should be a standard unified plugin.
 
 ```typescript
-import { MdastPlugin } from '../types';
+import { MdastPlugin, PipelineStage } from '../types';
+import { visit } from 'unist-util-visit';
+
+const myUnifiedPlugin = (options) => {
+  return (tree) => {
+    visit(tree, 'text', (node) => {
+      // transform logic
+    });
+  };
+};
 
 export const myPlugin: MdastPlugin = {
-  name: 'my-plugin',
-  stage: 'normalize', // 'normalize' | 'compile' | 'finalize'
+  plugin: myUnifiedPlugin,
+  stage: PipelineStage.normalize, // or 'compile', 'finalize'
   order: 50,          // 0-100
-  transform: async (tree, processor) => {
-    // Visit nodes and transform the tree
-  }
 };
 ```
 
-3.  Register your plugin in `src/pipeline.ts` in the `FluentProcessor` constructor if it should be a default plugin.
+3.  If it's a default plugin, add it to the `input` or `output` list of the relevant format in `src/formats/`.
 
 ## Adding a New Format
 
-1. Implement the `MdastFormatDefinition` interface.
-2. Register it using `FluentProcessor.registerFormat(name, definition)`.
+1. Define a `MdastFormat` object.
+2. Register it using `MdastPipeline.register(format)`.
 
 ```typescript
-import { FluentProcessor } from '../pipeline';
+import { MdastPipeline, PipelineStage } from '../src/pipeline';
 
-FluentProcessor.registerFormat('json', {
-  stringify: (processor) => {
-    processor.Compiler = (tree) => JSON.stringify(tree);
-  }
+MdastPipeline.register({
+  id: 'json',
+  title: 'JSON Format',
+  output: [{
+    plugin: function() {
+      this.Compiler = (tree) => JSON.stringify(tree);
+    },
+    stage: PipelineStage.stringify
+  }]
 });
 ```
 
 > **Note**: Format names are case-insensitive.
+>
+> **Important**: `unified` requires a `Compiler` to be attached for the process to complete successfully. If your format is intended to return an object (like the AST itself) rather than a string, you must provide a "pass-through" compiler:
+>
+> ```typescript
+> function astCompiler() {
+>   this.Compiler = (tree) => tree;
+> }
+> ```
 
 ## Coding Standards
 

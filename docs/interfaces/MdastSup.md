@@ -6,9 +6,9 @@
 
 # Interface: MdastSup
 
-Defined in: [packages/mdast-plus/src/types.ts:89](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L89)
+Defined in: [packages/mdast-plus/src/types.ts:99](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L99)
 
-mdast node for superscript text.
+Represents a superscript text node in mdast.
 
 ## Extends
 
@@ -20,7 +20,7 @@ mdast node for superscript text.
 
 > **children**: `PhrasingContent`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:91](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L91)
+Defined in: [packages/mdast-plus/src/types.ts:101](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L101)
 
 List of children.
 
@@ -65,7 +65,7 @@ have a position.
 
 > **type**: `"sup"`
 
-Defined in: [packages/mdast-plus/src/types.ts:90](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/types.ts#L90)
+Defined in: [packages/mdast-plus/src/types.ts:100](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L100)
 
 Node type.
 

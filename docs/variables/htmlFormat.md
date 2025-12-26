@@ -6,9 +6,11 @@
 
 # Variable: htmlFormat
 
-> `const` **htmlFormat**: [`MdastFormatDefinition`](../interfaces/MdastFormatDefinition.md)
+> `const` **htmlFormat**: [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/formats/html.ts:33](https://github.com/isdk/mdast-plus.js/blob/75ee549d3fb31ef4bc1b4a6b3307f6368072874e/src/formats/html.ts#L33)
+Defined in: [packages/mdast-plus/src/formats/html.ts:70](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/formats/html.ts#L70)
 
-HTML format definition for FluentProcessor.
-Handles both parsing (HTML -> MDAST) and stringifying (MDAST -> HTML).
+HTML format definition.
+
+Provides a bidirectional mapping between HTML strings and mdast-plus ASTs.
+Includes built-in sanitization and support for table spans and image dimensions.
