@@ -1,112 +1,95 @@
+import type { Plugin } from 'unified';
 import type { Parent as UnistParent } from 'unist';
 import type { Root, PhrasingContent } from 'mdast';
 import type { Properties } from 'hast';
 
 /**
- * Stages for mdast-plus pipeline processing.
+ * PipelineStage defines the execution order of plugins in the processing pipeline.
+ * Plugins are sorted and executed in ascending order based on these stage values.
  */
-export type Stage = 'normalize' | 'compile' | 'finalize';
+export enum PipelineStage {
+  /** Initial stage for parsing raw input (e.g., string to AST). */
+  parse     = 0,
+  /** Normalization stage for cleaning up and canonicalizing the AST (e.g., GFM, Directives). */
+  normalize = 100,
+  /** Transformation stage for semantic changes and custom high-level logic. */
+  compile   = 200,
+  /** Finalization stage for preparing the AST for output (e.g., Sanitize, bridge to HAST). */
+  finalize  = 300,
+  /** Final stage for serializing the AST to the target format result. */
+  stringify = 400
+}
+
+/** The default stage assigned to a plugin if none is specified. */
+export const DefaultPipelineStage = PipelineStage.compile;
+
+/** String names corresponding to the PipelineStage levels. */
+export type PipelineStageName = keyof typeof PipelineStage;
 
 /**
- * Definition for an mdast plugin.
+ * Configuration for a plugin within the mdast-plus pipeline.
+ * It wraps a standard unified plugin with execution metadata.
  */
 export interface MdastPlugin {
-  /** Plugin name */
-  name: string;
-  /** Processing stage the plugin belongs to */
-  stage?: Stage;
-  /** Execution order within the stage (lower numbers run first) */
+  /** The standard unified plugin (attacher) function. */
+  plugin: Plugin<any[], any, any>;
+  /**
+   * Arguments passed to the plugin.
+   * MUST be an array of arguments (e.g., [optionsObject]).
+   */
+  options?: any[];
+  /** The stage in which this plugin should run. */
+  stage?: PipelineStage | PipelineStageName;
+  /** Execution priority within the same stage. Lower values run earlier. */
   order?: number;
-  /** Transformation function */
-  transform: (tree: Root, ctx: any) => Promise<void> | void;
 }
 
 /**
- * Options for `mdast-plus` processor.
- * Assumes that all plugins for a given format (e.g., markdown)
- * have unique option keys.
+ * Defines a document format, encompassing its input (parsing) and output (serialization) strategies.
  */
-export interface MdastPlusOptions {
-  /**
-   * A bag of options for all markdown-related plugins (remark-parse, remark-gfm, etc.).
-   */
-  markdown?: Record<string, any>;
-  /**
-   * A bag of options for all HTML-related plugins (rehype-parse, rehype-remark, etc.).
-   */
-  html?: Record<string, any>;
+export interface MdastFormat {
+  /** Unique identifier for the format (e.g., 'markdown', 'html'). */
+  id: string;
+  /** Human-readable title. */
+  title?: string;
+  /** File extensions associated with this format. */
+  extensions?: string[];
+  /** MIME types associated with this format. */
+  mediaTypes?: string[];
+
+  /** Plugins used for reading this format into a standard AST (Parser + Normalizer). */
+  input?: MdastPlugin[];
+
+  /** Plugins used for serializing the AST into this format (Finalizer + Stringifier). */
+  output?: MdastPlugin[];
 }
 
 /**
- * Definition for an mdast format (parser/stringifier).
- */
-export interface MdastFormatDefinition {
-  /**
-   * Flag indicating whether the format needs a transform to mdast.
-   * defaults to true.
-   */
-  needsTransformToMdast?: boolean;
-  /** Function to register parser plugins */
-  parse?: (processor: any, options?: MdastPlusOptions) => void;
-  /** Function to register stringifier plugins */
-  stringify?: (processor: any, options?: MdastPlusOptions) => void;
-}
-
-/**
- * Represents an asset (e.g., image) extracted during processing.
- */
-export interface MdastAsset {
-  /** Relative path or identifier for the asset */
-  path: string;
-  /** MIME type of the asset */
-  contentType: string;
-  /** Raw content as bytes */
-  bytes: Uint8Array;
-}
-
-/**
- * Result of a conversion process.
- * @template T - The type of the main content (default: string)
- */
-export interface ConvertResult<T = string> {
-  /** The converted content */
-  content: T;
-  /** Extracted assets */
-  assets: MdastAsset[];
-}
-
-/**
- * Original metadata for a node.
+ * Metadata capturing the origin of a node during conversion.
  */
 export interface MdastDataOrigin {
-  /** Source format */
+  /** The original source format. */
   format: 'docx' | 'notion' | 'html' | 'markdown' | 'latex' | string;
-  /** Raw data from the source */
+  /** The raw content from the source before conversion. */
   raw?: unknown;
-  /** Hash of the source content */
+  /** Hash used for caching or change detection. */
   hash?: string;
   [k: string]: unknown;
 }
 
-/**
- * mdast node for highlighted text (mark).
- */
+/** Represents a highlighted text (mark) node in mdast. */
 export interface MdastMark extends UnistParent {
   type: 'mark';
   children: PhrasingContent[];
 }
 
-/**
- * mdast node for subscript text.
- */
+/** Represents a subscript text node in mdast. */
 export interface MdastSub extends UnistParent {
   type: 'sub';
   children: PhrasingContent[];
 }
 
-/**
- * mdast node for superscript text.
- */
+/** Represents a superscript text node in mdast. */
 export interface MdastSup extends UnistParent {
   type: 'sup';
   children: PhrasingContent[];
@@ -143,40 +126,4 @@ declare module 'mdast' {
     sub: MdastSub;
     sup: MdastSup;
   }
-}
-
-/**
- * Interface for reading input into an mdast tree.
- * @template I - Input type
- */
-export interface MdastReader<I> {
-  /**
-   * Reads input and returns an mdast Root node.
-   * @param input - The input to read
-   */
-  read(input: I): Promise<Root>;
-}
-
-/**
- * Interface for transforming an mdast tree.
- */
-export interface MdastTransformer {
-  /**
-   * Transforms the given mdast tree.
-   * @param tree - The Root node to transform
-   */
-   transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
-}
-
-/**
- * Interface for writing an mdast tree to an output format.
- * @template Output - Output type (default: string)
- */
-export interface MdastWriter<Output = string> {
-  /**
-   * Writes the mdast tree to the target output.
-   * @param tree - The Root node to write
-   * @param assets - Optional assets to include
-   */
-  write(tree: Root, assets?: MdastAsset[]): Promise<ConvertResult<Output>>;
 }

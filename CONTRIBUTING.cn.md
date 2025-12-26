@@ -8,11 +8,13 @@
 
 ### 核心概念
 
-1.  **Fluent API**: 主要入口是 `src/pipeline.ts` 中的 `mdast()` 函数。
-2.  **分阶段插件**: 插件分为三个阶段：
+1.  **Fluent API**: 主要入口是 `src/pipeline.ts` 中的 `mdast()` 函数，由 `MdastPipeline` 支持。
+2.  **分阶段插件**: 插件被分类为 5 个阶段 (`PipelineStage`)：
+    *   `parse`: 将输入解析为 AST。
     *   `normalize`: 清理并规范化语法树。
     *   `compile`: 高级语义转换。
     *   `finalize`: 输出前的最后准备。
+    *   `stringify`: 将 AST 序列化为输出。
 3.  **通用数据协议**: 节点使用 `node.data` 存储元数据，使用 `node.data.hProperties` 存储 HTML 属性。
 
 ## 开始开发
@@ -55,42 +57,58 @@ pnpm run lint
 ## 添加新插件
 
 1.  在 `src/plugins/` 中创建您的插件。
-2.  实现 `MdastPlugin` 接口：
+2.  实现 `MdastPlugin` 接口。`plugin` 属性应该是一个标准的 unified 插件。
 
 ```typescript
-import { MdastPlugin } from '../types';
+import { MdastPlugin, PipelineStage } from '../types';
+import { visit } from 'unist-util-visit';
+
+const myUnifiedPlugin = (options) => {
+  return (tree) => {
+    visit(tree, 'text', (node) => {
+      // 转换逻辑
+    });
+  };
+};
 
 export const myPlugin: MdastPlugin = {
-  name: 'my-plugin',
-  stage: 'normalize', // 'normalize' | 'compile' | 'finalize'
-  order: 50,          // 优先级 0-100
-  transform: async (tree, processor) => {
-    // 访问节点并转换树
-  }
+  plugin: myUnifiedPlugin,
+  stage: PipelineStage.normalize, // 或 'compile', 'finalize'
+  order: 50,          // 0-100
 };
 ```
 
-3.  如果该插件应为默认插件，请在 `src/pipeline.ts` 的 `FluentProcessor` 构造函数中注册它。
+3.  如果它是默认插件，请将其添加到 `src/formats/` 中相关格式的 `input` 或 `output` 列表中。
 
 ## 添加新格式
 
-1. 实现 `MdastFormatDefinition` 接口。
-2. 使用 `FluentProcessor.registerFormat(name, definition)` 进行注册。
+1. 定义一个 `MdastFormat` 对象。
+2. 使用 `MdastPipeline.register(format)` 进行注册。
 
 ```typescript
-import { FluentProcessor } from '../pipeline';
+import { MdastPipeline, PipelineStage } from '../src/pipeline';
 
-FluentProcessor.registerFormat('json', {
-  // 可选：是否需要执行转换器（transformer）以转换为 mdast。
-  // 默认为 true。如果解析结果已经是标准的 mdast 且不需要进一步处理，可以设为 false。
-  needsTransformToMdast: false,
-  stringify: (processor) => {
-    processor.Compiler = (tree) => JSON.stringify(tree);
-  }
+MdastPipeline.register({
+  id: 'json',
+  title: 'JSON Format',
+  output: [{
+    plugin: function() {
+      this.Compiler = (tree) => JSON.stringify(tree);
+    },
+    stage: PipelineStage.stringify
+  }]
 });
 ```
 
 > **注意**: 格式名称不区分大小写。
+>
+> **重要提示**: `unified` 要求必须挂载一个 `Compiler` 才能完成处理流程。如果你的格式旨在返回一个对象（如 AST 本身）而非字符串，你需要提供一个“透传（pass-through）”编译器：
+>
+> ```typescript
+> function astCompiler() {
+>   this.Compiler = (tree) => tree;
+> }
+> ```
 
 ## 编码规范
 

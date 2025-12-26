@@ -11,7 +11,7 @@ English | [简体中文](./README.cn.md) | [GitHub](https://github.com/isdk/mdas
 ## Features
 
 - **Fluent API**: Chainable interface `mdast(input).use(plugin).toHTML()`.
-- **Staged Plugins**: Organize transformations into `normalize`, `compile`, and `finalize` stages with priority ordering.
+- **Staged Plugins**: Organize transformations into `parse`, `normalize`, `compile`, `finalize`, and `stringify` stages.
 - **Semantic Normalization**:
   - **Directives**: Canonicalizes admonition names and extracts titles from labels.
   - **Table Spans**: Support for `rowspan` and `colspan` in HTML output.
@@ -40,6 +40,17 @@ const html = await mdast(':::warning[Special Note]\nBe careful!\n:::')
 // Result: <div title="Special Note" class="warning"><p>Be careful!</p></div>
 ```
 
+### Configure Input Options
+
+You can pass options to input plugins (like `remark-gfm` or `remark-parse`) using the second argument of `.from()`:
+
+```typescript
+// Enable single tilde strikethrough (~text~)
+const md = await mdast('Hello ~world~')
+  .from('markdown', { remarkGfm: { singleTilde: true } })
+  .toMarkdown();
+```
+
 ### Image Sizing
 
 ```typescript
@@ -50,8 +61,11 @@ const html = await mdast('![Cat](cat.png#=500x300)').toHTML();
 ### AST Output
 
 ```typescript
+// Get the fully processed AST (after normalization)
 const ast = await mdast('==Highlighted==').toAST();
-// Returns the mdast Root object
+
+// Get the raw AST (after parsing, before normalization)
+const rawAst = await mdast('==Highlighted==').toAST({ stage: 'parse' });
 ```
 
 ### Advanced Pipeline
@@ -59,13 +73,9 @@ const ast = await mdast('==Highlighted==').toAST();
 ```typescript
 const { content, assets } = await mdast(myInput)
   .data({ myGlobal: 'value' })
-  .use({
-    name: 'my-plugin',
-    stage: 'compile',
-    transform: async (tree) => {
-      // transform the AST
-    }
-  })
+  // Add a custom plugin at the 'compile' stage
+  .useAt('compile', myPlugin, { option: 1 })
+  .priority(10) // Run later than default plugins
   .to('html');
 ```
 
@@ -74,16 +84,20 @@ const { content, assets } = await mdast(myInput)
 You can register custom input or output formats:
 
 ```typescript
-import { FluentProcessor, mdast } from '@isdk/mdast-plus';
+import { MdastPipeline, mdast, PipelineStage } from '@isdk/mdast-plus';
 
 // Register a custom output format
-FluentProcessor.registerFormat('reverse', {
-  stringify: (p) => {
-    p.Compiler = (tree) => {
-      // your custom stringification logic
-      return '...';
-    };
-  }
+MdastPipeline.register({
+  id: 'reverse',
+  output: [{
+    plugin: function() {
+      this.Compiler = (tree) => {
+        // your custom stringification logic
+        return '...';
+      };
+    },
+    stage: PipelineStage.stringify
+  }]
 });
 
 const result = await mdast('Hello').to('reverse');
@@ -95,9 +109,11 @@ const result = await mdast('Hello').to('reverse');
 
 Plugins are executed based on their `stage` and `order`:
 
-1.  **normalize** (order 0-100): Cleanup and canonicalize the tree.
-2.  **compile** (order 0-100): High-level semantic transformations.
-3.  **finalize** (order 0-100): Final preparation before output.
+1.  **parse** (0): Input parsing (e.g., `remark-parse`).
+2.  **normalize** (100): Cleanup and canonicalize the tree.
+3.  **compile** (200): High-level semantic transformations.
+4.  **finalize** (300): Final preparation before output (e.g. `rehype-sanitize`).
+5.  **stringify** (400): Output generation.
 
 ## Core Plugins Included
 

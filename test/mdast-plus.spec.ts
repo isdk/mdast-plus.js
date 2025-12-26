@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mdast } from '../src';
+import rehypeParse from 'rehype-parse';
+import rehypeRemark from 'rehype-remark';
 
 describe('mdast-plus fluent API', () => {
   it('should convert simple markdown to HTML', async () => {
@@ -14,7 +16,13 @@ describe('mdast-plus fluent API', () => {
 
   it('should pass rehype options for parsing (fragment: false)', async () => {
     const input = '<div>root1</div><div>root2</div>';
-    const ast: any = await mdast(input, { html: { fragment: false } }).from('html').toAST();
+    // To pass options now, we can register a custom format or add the plugin with options.
+    // Here we'll just test that we can get a full document if we use rehype-parse with fragment: false
+    // We only use rehypeParse to verify HAST structure (element/html/body), skipping rehypeRemark which would convert to MDAST.
+    const ast: any = await mdast(input)
+        .useAt('parse', rehypeParse, { fragment: false })
+        .toAST();
+
     // Expect the AST to represent a full HTML document structure
     expect(ast.type).toBe('root');
     expect(ast.children[0].type).toBe('element');
@@ -26,6 +34,22 @@ describe('mdast-plus fluent API', () => {
     expect(bodyChildren[0].children[0].value).toBe('root1'); // Check text content
     expect(bodyChildren[1].tagName).toBe('div');
     expect(bodyChildren[1].children[0].value).toBe('root2')
+  });
+
+  it('should allow overriding plugin options (e.g. remark-gfm)', async () => {
+    // Default GFM requires ~~ for strikethrough.
+    // We configure singleTilde: true to allow ~ for strikethrough.
+    const input = 'Hello ~world~';
+
+
+    // Use the overrides feature
+    const ast = await mdast(input)
+        .from('markdown', { remarkGfm: { singleTilde: true } })
+        .toAST();
+
+    const p = ast.children[0] as any; // paragraph
+    const deleteNode = p.children[1];
+    expect(deleteNode.type).toBe('delete');
   });
 });
 
@@ -100,7 +124,7 @@ graph TD; A-->B;
     expect(md).toContain('~2~');
     expect(md).toContain('^10^');
 
-    md = await mdast(html).from('HTML').toMarkdown();
+    md = await mdast(html).from('html').toMarkdown();
     expect(md).toContain('==高亮==');
     expect(md).toContain('~2~');
     expect(md).toContain('^10^');
@@ -128,5 +152,14 @@ describe('AST format support', () => {
     // Verify that normalizeInlineStyles plugin ran
     const p = ast.children[0] as any;
     expect(p.children[0].type).toBe('mark');
+  });
+
+  it('should return raw AST when stage is restricted to parse', async () => {
+    // Normalization runs at stage 'normalize'. If we stop at 'parse', it shouldn't run.
+    const ast = await mdast('==marked==').toAst({ stage: 'parse' });
+    const p = ast.children[0] as any;
+    // Should be text node, not mark node yet
+    expect(p.children[0].type).toBe('text');
+    expect(p.children[0].value).toBe('==marked==');
   });
 });

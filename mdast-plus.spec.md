@@ -249,27 +249,12 @@ export type { Root } from "mdast";
 export type { Properties } from "hast";
 export type { ContainerDirective, LeafDirective, TextDirective } from "mdast-util-directive";
 
-export type MdastAsset = {
-  path: string;        // e.g. "assets/diagram-1.svg"
-  contentType: string; // e.g. "image/svg+xml"
-  bytes: Uint8Array;
-};
-
-export type ConvertResult<T> = {
-  content: T;            // 转换后的主内容 (String/Buffer/JSON)
-  assets: MdastAsset[];       // 伴随资源
-};
-
-export interface MdastReader<I> {
-  read(input: I): Promise<Root>;
-}
-
-export interface MdastTransformer {
-  transform(tree: Root): Promise<{ tree: Root; assets?: MdastAsset[] }>;
-}
-
-export interface MdastWriter<Output = string> {
-  write(tree: Root, assets?: Asset[]): Promise<ConvertResult<Output>>;
+export enum PipelineStage {
+  parse     = 0,   // [System] 解析 (remark-parse)
+  normalize = 100, // [System/Core] 规范化 (GFM, Directive Normalization)
+  compile   = 200, // [User] 编译/转换 (DSL, Toc, Custom logic)
+  finalize  = 300, // [Format] 最终处理/桥接 (Sanitize, remark-rehype)
+  stringify = 400  // [System] 序列化 (Stringifier)
 }
 
 // Inline style extensions
@@ -618,18 +603,17 @@ graph TD; A-->B;
 
 ## 5. 处理管线建议（Pipeline Recommendation）
 
-为实现 mdast+ 的“解析—标准化—编译—输出”闭环，推荐如下顺序：
+为实现 mdast+ 的“解析—标准化—编译—输出”闭环，推荐如下分阶段顺序（`PipelineStage`）：
 
-### 5.1 Parse（Input -> Raw AST）
+### 5.1 Parse (Stage 0)
 
-由 `MdastReader` 负责。
+由 `MdastPipeline` 的输入格式插件负责。
 
-* **Markdown**: 加载 `remark-gfm`, `remark-math`, `remark-directive`。
+* **Markdown**: 加载 `remark-parse`, `remark-gfm`, `remark-math`, `remark-directive`。
 * **HTML**: 使用 `rehype-parse` -> `rehype-remark`。
-* **Docx/Notion**: 第三方 `Reader` 解析为 `AST`。
-  * 将 Word 样式映射到 `data.hProperties`；表格结构映射到 `table/tableRow/tableCell`；必要时写入 `_origin`。
+* **Docx/Notion**: 第三方 Reader 解析为 AST。
 
-### 5.2 Normalization (Raw AST -> Mdast+ AST)
+### 5.2 Normalize (Stage 100)
 
 由 `@isdk/mdast-plus` 内置插件强制执行，确保 AST 符合规范。
 
@@ -639,23 +623,28 @@ graph TD; A-->B;
 2. **Table Normalize**：rowspan/colspan 迁移（见 4.2）
 3. **Code Meta Extraction**: 解析 `code.meta` → `code.data`（见 4.3）
 4. **Image Sizing**: 解析图片 URL 中的尺寸参数 (见 2.A.2)
+5. **Inline Styles**: 标准化行内样式（mark/sub/sup）。
 
-### 5.3 Transform (Compile/Render DSL)
+### 5.3 Compile (Stage 200)
 
-用户自定义或特定场景的 `MdastTransformer`。
+用户自定义插件的主要执行阶段。
 
-* Diagrams：识别 `code.lang`（mermaid/plantuml），按目标输出策略：
-  - HTML/React：可保留 code 供客户端渲染
-  - Word/PDF：编译为 `image` 并产出 `assets`
-* Data DSL：如 `csv` → `table`（并将原 csv 存入 `_origin.raw`）
-* **Asset Collection**: 下载远程图片为本地 `Asset`，并更新 `image.url`。
+* **DSL Transform**：识别 `code.lang`（mermaid/plantuml），转换/编译内容。
+* **Custom Logic**: 业务特定的 AST 转换。
 
-### 5.4 Stringify（输出）
+### 5.4 Finalize (Stage 300)
 
-由 `MdastWriter` 负责。
+输出前的最后处理与桥接。
 
-- To Markdown：使用 `remark-stringify`。尽量保持可逆；不支持的结构按降级规则输出
-- To HTML：使用 `remark-rehype` -> `rehype-sanitize` (必须) -> `rehype-stringify`, 生成 HTML 前/后进行 sanitize（见 2.B.3）
+* **Bridge**: `remark-rehype` (AST -> HAST)。
+* **Sanitize**: `rehype-sanitize` (HTML 输出必须)。
+
+### 5.5 Stringify (Stage 400)
+
+序列化为目标格式。
+
+- **To Markdown**: `remark-stringify`。
+- **To HTML**: `rehype-stringify`。
 
 ---
 
@@ -680,8 +669,10 @@ graph TD; A-->B;
   - `formats/markdown.ts`（remark preset）
   - `formats/html.ts`（rehype preset）
   - `plugins/normalize-directive.ts`
+  - `plugins/normalize-inline-styles.ts`
   - `plugins/normalize-table-span.ts`
   - `plugins/extract-code-meta.ts`
+  - `plugins/image-size.ts`
   - `plugins/compile-mermaid.ts`（可选，或放第三方包）
   - `types/mdast-plus.ts`
 

@@ -62,6 +62,7 @@
     "unist-util-select": "^5.1.0",
     "unist-util-visit": "^5.0.0",
     "util-ex": "^2.4.0",
+    "vfile": "^6.0.3",
     "yaml": "^2.8.2"
   },
   "devDependencies": {

@@ -1,220 +1,373 @@
 import { unified, type Processor } from 'unified';
+import { VFile, type VFileCompatible } from 'vfile';
+
 import type { Root } from 'mdast';
-import type {
-  MdastPlugin,
-  ConvertResult,
-  MdastAsset,
-  MdastFormatDefinition,
-  MdastPlusOptions,
-} from './types';
+
+import { DefaultPipelineStage, type MdastFormat, type MdastPlugin, PipelineStage, PipelineStageName } from './types';
 
 // Default Formats
 import { markdownFormat } from './formats/markdown';
 import { htmlFormat } from './formats/html';
-
-// Default Plugins
-import { normalizeDirectivePlugin } from './plugins/normalize-directive';
-import { normalizeTableSpanPlugin } from './plugins/normalize-table-span';
-import { extractCodeMetaPlugin } from './plugins/extract-code-meta';
-import { imageSizePlugin } from './plugins/image-size';
-import { inlineStylesPlugin } from './plugins/normalize-inline-styles';
+import { astFormat, astCompiler } from './formats/ast';
 
 /**
- * Fluent processor for mdast transformations.
- * Allows chaining configuration and finally converting to a target format.
+ * Checks if the given input is a unist/mdast Node.
+ * @param input - The object to check.
+ * @returns True if it's a Node object with a 'type' property.
  */
-export class FluentProcessor {
-  /** Map of registered format definitions */
-  static formats: Record<string, MdastFormatDefinition> = {
-    markdown: markdownFormat,
-    html: htmlFormat,
-    ast: {
-      needsTransformToMdast: false,
-      parse: (p) => {
-        p.Parser = (text: string) => JSON.parse(text);
-      },
-      stringify: (p) => {
-        p.Compiler = (node: any) => node;
-      },
-    },
-  };
+function isNode(input: any): boolean {
+  return typeof input === 'object' && input !== null && typeof input.type === 'string';
+}
+
+/**
+ * Base implementation of the fluent mdast processing pipeline.
+ * Manages the plugin registry and the execution queue.
+ */
+export class MdastBasePipeline {
+  private static readonly registry = new Map<string, MdastFormat>();
 
   /**
-   * Registers a new format definition.
-   * @param name - The name of the format (e.g., 'docx')
-   * @param definition - The format definition containing parse/stringify logic
+   * Registers a global document format.
+   * @param format - The format definition to register.
    */
-  static registerFormat(name: string, definition: MdastFormatDefinition) {
-    FluentProcessor.formats[name.toLowerCase()] = definition;
+  public static register(format: MdastFormat) {
+    this.registry.set(format.id, format);
   }
 
-  private processor: Processor;
-  private input: any;
-  private inputFormat: string = 'markdown';
-  private plugins: MdastPlugin[] = [];
-  private globalData: Record<string, any> = {};
-  private _options: MdastPlusOptions = {};
+  /**
+   * Retrieves a registered format by its ID.
+   * @param id - The format identifier.
+   * @returns The format definition or undefined if not found.
+   */
+  public static getFormat(id: string): MdastFormat | undefined {
+    return this.registry.get(id);
+  }
+
+  protected input: VFileCompatible;
+  protected queue: MdastPlugin[] = [];
 
   /**
-   * Creates a new FluentProcessor instance.
-   * @param input - The input content (string or mdast tree)
-   * @param options - The options for mdast-plus
+   * Initializes a new pipeline instance with the given input.
+   * @param input - Content to process (string, Buffer, VFile, or AST Node).
    */
-  constructor(input: any, options?: MdastPlusOptions) {
+  constructor(input: VFileCompatible) {
     this.input = input;
-    if (options) {
-      this._options = options;
-    }
-    this.processor = unified();
-
-    // Core Normalization Plugins (Default)
-    this.use(normalizeDirectivePlugin);
-    this.use(normalizeTableSpanPlugin);
-    this.use(extractCodeMetaPlugin);
-    this.use(imageSizePlugin);
-    this.use(inlineStylesPlugin);
   }
 
   /**
-   * Specifies the input format.
-   * @param format - The input format name (default: 'markdown')
+   * Instance-level access to the global format registry.
    */
-  from(format: string): this {
-    this.inputFormat = format.toLowerCase();
-    return this;
+  public getFormat(id: string): MdastFormat | undefined {
+    const ctor = this.constructor as typeof MdastPipeline;
+    return ctor.getFormat(id);
   }
 
   /**
-   * Adds a plugin to the processing pipeline.
-   * @param plugin - The mdast plugin to use
+   * Resolves a format identifier or object to a valid MdastFormat.
+   * @private
    */
-  use(plugin: MdastPlugin): this {
-    this.plugins.push(plugin);
-    return this;
-  }
-
-  /**
-   * Merges global data into the processor.
-   * @param data - Key-value pairs to store in global data
-   */
-  data(data: Record<string, any>): this {
-    this.globalData = { ...this.globalData, ...data };
-    return this;
-  }
-
-  /**
-   * Merges options into the processor.
-   * @param options - The options for mdast-plus
-   */
-  options(options: MdastPlusOptions): this {
-    this._options = {
-      ...this._options,
-      ...options,
-      markdown: { ...this._options?.markdown, ...options?.markdown },
-      html: { ...this._options?.html, ...options?.html },
-    };
-    return this;
-  }
-
-  /**
-   * Converts the input content to the specified format.
-   * @param format - The output format name
-   * @returns A promise resolving to the conversion result (content and assets)
-   */
-  async to(format: string): Promise<ConvertResult> {
-    format = format.toLowerCase();
-
-    // 1. Setup Input Parser
-    const inputProcessor = unified();
-    const inputFormatDef = FluentProcessor.formats[this.inputFormat];
-    if (inputFormatDef?.parse) {
-      inputFormatDef.parse(inputProcessor, this._options);
-    }
-
-    // 2. Parse & Transform to mdast
-    let tree = (typeof this.input === 'string'
-      ? inputProcessor.parse(this.input)
-      : this.input) as Root;
-
-    const needsRun = inputFormatDef.needsTransformToMdast !== false; // default to true
-    const isAstOutput = format === 'ast';
-
-    // Run transformers if the format definition requires it (e.g., for HAST -> MDAST),
-    // but skip it if the user just wants the intermediate AST for debugging/testing.
-    if (needsRun && !isAstOutput) {
-      tree = await inputProcessor.run(tree) as Root;
-    }
-
-    // 3. Inject global data into tree
-    tree.data = { ...tree.data, ...this.globalData };
-
-    // 4. Staged Transform
-    const sortedPlugins = [...this.plugins].sort((a, b) => {
-      const stages: Record<string, number> = { normalize: 0, compile: 1, finalize: 2 };
-      const aStage = a.stage || 'normalize';
-      const bStage = b.stage || 'normalize';
-
-      if (aStage !== bStage) {
-        return stages[aStage] - stages[bStage];
+  private resolveFormat(fmt: string | MdastFormat): MdastFormat {
+    if (typeof fmt === 'string') {
+      const found = this.getFormat(fmt);
+      if (!found) {
+        throw new Error(`[MdastPlus] Format '${fmt}' is not registered.`);
       }
-      return (a.order || 0) - (b.order || 0);
+      return found;
+    }
+    return fmt;
+  }
+
+  /**
+   * Normalizes a plugin entry for runtime execution.
+   * @private
+   */
+  private toRuntimeEntry(
+    entry: MdastPlugin,
+    defaultStage: PipelineStage,
+    overrides?: Record<string, any>
+  ): MdastPlugin {
+    let stage = defaultStage;
+    if (entry.stage !== undefined) {
+      if (typeof entry.stage === 'string') {
+        stage = PipelineStage[entry.stage] ?? defaultStage;
+      } else {
+        stage = entry.stage as PipelineStage;
+      }
+    }
+
+    let options = entry.options || [];
+    if (overrides && entry.plugin.name) {
+        if (entry.plugin.name in overrides) {
+            const override = overrides[entry.plugin.name];
+            options = Array.isArray(override) ? override : [override];
+        }
+    }
+
+    return {
+      plugin: entry.plugin,
+      options,
+      stage,
+      order: entry.order || 0
+    };
+  }
+
+  /**
+   * Configures the input format and adds its associated plugins to the pipeline.
+   * @param fmt - Format ID or definition.
+   * @param overrides - Optional map to override plugin options by plugin name.
+   * @returns The pipeline instance for chaining.
+   */
+  public from(fmt: string | MdastFormat, overrides?: Record<string, any>): this {
+    const format = this.resolveFormat(fmt);
+    if (!format.input || format.input.length === 0) {
+      throw new Error(`[MdastPlus] Format '${format.id}' does not support input.`);
+    }
+
+    // Input plugins default to the Parse (0) stage.
+    for (const p of format.input) {
+      this.queue.push(this.toRuntimeEntry(p, PipelineStage.parse, overrides));
+    }
+
+    return this;
+  }
+
+  /**
+   * Processes the pipeline and serializes the result into the specified format.
+   * @param fmt - Target format ID or definition.
+   * @param overrides - Optional map to override plugin options.
+   * @returns A promise resolving to a VFile containing the result.
+   */
+  public async to(fmt: string | MdastFormat, overrides?: Record<string, any>): Promise<VFile> {
+    const format = this.resolveFormat(fmt);
+    if (!format.output) {
+      throw new Error(`[MdastPlus] Format '${format.id}' does not support output.`);
+    }
+
+    // 1. Fork Queue
+    const runQueue = [...this.queue];
+
+    // Check implicit input format BEFORE adding output plugins
+    const hasParser = runQueue.some(p => (p.stage ?? DefaultPipelineStage) === PipelineStage.parse);
+    const inputIsNode = isNode(this.input);
+
+    if (!hasParser) {
+        if (inputIsNode) {
+             // Default to AST input plugins for Node input
+             const astFormat = MdastBasePipeline.getFormat('ast');
+             if (astFormat && astFormat.input) {
+                for (const p of astFormat.input) {
+                    runQueue.push(this.toRuntimeEntry(p, PipelineStage.parse, overrides));
+                }
+             }
+        } else {
+            // Default to Markdown for text input
+            const mdFormat = MdastBasePipeline.getFormat('markdown');
+            if (mdFormat && mdFormat.input) {
+               for (const p of mdFormat.input) {
+                  runQueue.push(this.toRuntimeEntry(p, PipelineStage.parse, overrides));
+               }
+            }
+        }
+    }
+
+    // 2. Append Output Plugins
+    // Output plugins default to the Finalize (300) stage.
+    for (const p of format.output) {
+      runQueue.push(this.toRuntimeEntry(p, PipelineStage.finalize, overrides));
+    }
+
+    // 3. Assemble & Run
+    const processor = this.assembleProcessor(runQueue);
+
+    if (inputIsNode) {
+        // Input is AST: Skip Parsing. Run transformers then stringify.
+        const tree = await processor.run(this.input as any);
+        const result = processor.stringify(tree);
+        const file = new VFile();
+        if (typeof result === 'string' || Buffer.isBuffer(result)) {
+            file.value = result;
+        } else {
+            file.result = result;
+        }
+        return file;
+    } else {
+        return processor.process(this.input);
+    }
+  }
+
+  /**
+   * Adds a plugin to the pipeline's compile stage.
+   * @param plugin - The unified plugin function.
+   * @param options - Arguments for the plugin.
+   * @returns The pipeline instance for chaining.
+   */
+  public use(plugin: any, ...options: any[]): this {
+    return this.useAt('compile', plugin, ...options);
+  }
+
+  /**
+   * Adds a plugin to the pipeline at a specific stage.
+   * @param stage - The stage name or numeric value.
+   * @param plugin - The unified plugin function.
+   * @param options - Arguments for the plugin.
+   * @returns The pipeline instance for chaining.
+   */
+  public useAt(stage: PipelineStageName, plugin: any, ...options: any[]): this {
+    this.queue.push({
+      plugin,
+      options,
+      stage: PipelineStage[stage],
+      order: 0
+    });
+    return this;
+  }
+
+  /**
+   * Sets the priority order for the most recently added plugin.
+   * Plugins with lower order run earlier within the same stage.
+   * @param order - Numeric priority.
+   * @returns The pipeline instance for chaining.
+   */
+  public priority(order: number): this {
+    const last = this.queue[this.queue.length - 1];
+    if (last) {
+      last.order = order;
+    }
+    return this;
+  }
+
+  /**
+   * Assembles a unified processor based on the sorted plugin queue.
+   * @protected
+   */
+  protected assembleProcessor(queue: MdastPlugin[]): Processor {
+    queue.sort((a, b) => {
+      const aStage = a.stage ?? DefaultPipelineStage;
+      const bStage = b.stage ?? DefaultPipelineStage;
+      if (aStage !== bStage) return aStage - bStage;
+      return a.order! - b.order!;
     });
 
-    for (const plugin of sortedPlugins) {
-      await plugin.transform(tree, this.processor);
+    const processor = unified();
+
+    for (const entry of queue) {
+      processor.use(entry.plugin, ...entry.options);
     }
 
-    // 5. Setup Output Compiler
-    const outputProcessor = unified().data('settings', this.processor.data('settings'));
-    const outputFormatDef = FluentProcessor.formats[format];
-    if (outputFormatDef?.stringify) {
-      outputFormatDef.stringify(outputProcessor, this._options);
-    }
-    if (format === 'markdown' && !outputFormatDef) {
-      // fallback if somehow removed
-      markdownFormat.stringify!(outputProcessor, this._options);
-    }
-
-    // 6. Finalize (compile)
-    const result = await outputProcessor.run(tree);
-    const content = outputProcessor.stringify(result) as string;
-
-    // 7. Extract Assets
-    const assets: MdastAsset[] = [];
-    if (tree.data && (tree.data as any).assets) {
-      assets.push(...(tree.data as any).assets);
-    }
-
-    return { content, assets };
-  }
-
-  /**
-   * Helper to convert content to Markdown.
-   * @returns A promise resolving to the Markdown string
-   */
-  async toMarkdown(): Promise<string> {
-    const result = await this.to('markdown');
-    return result.content;
-  }
-
-  /**
-   * Helper to convert content to HTML.
-   * @returns A promise resolving to the HTML string
-   */
-  async toHTML(): Promise<string> {
-    const result = await this.to('html');
-    return result.content;
-  }
-
-  /**
-   * Helper to get the processed mdast tree.
-   * @returns A promise resolving to the mdast Root node
-   */
-  async toAST(): Promise<Root> {
-    const result = await this.to('ast');
-    return result.content as any;
+    return processor;
   }
 }
+
+/**
+ * Extended pipeline with convenience methods for common formats.
+ */
+export class MdastPipeline extends MdastBasePipeline {
+  /**
+   * Finalizes the pipeline and returns the result as a Markdown string.
+   */
+  public async toMarkdown() {
+    const vfile = await this.to('markdown');
+    return String(vfile);
+  }
+
+  /**
+   * Finalizes the pipeline and returns a VFile containing the Markdown result.
+   */
+  public toMarkdownVFile() {
+    return this.to('markdown');
+  }
+
+  /**
+   * Finalizes the pipeline and returns the result as an HTML string.
+   */
+  public async toHtml() {
+    const vfile = await this.to('html');
+    return String(vfile);
+  }
+
+  /**
+   * Finalizes the pipeline and returns a VFile containing the HTML result.
+   */
+  public toHtmlVFile() {
+    return this.to('html');
+  }
+
+  /**
+   * Finalizes the pipeline and returns the resulting AST (Root node).
+   * @param options - Configuration for the extraction.
+   * @param options.stage - Run the pipeline up to this stage only.
+   * @param options.overrides - Map for plugin option overrides.
+   */
+  public async toAst(options?: { stage?: PipelineStageName, overrides?: Record<string, any> }) {
+    if (options?.stage) {
+      const targetStage = PipelineStage[options.stage];
+      // Run only up to the specified stage
+      const runQueue = this.queue.filter(p => {
+        const s = p.stage ?? DefaultPipelineStage;
+        return s <= targetStage;
+      });
+
+      // Add the pass-through compiler to return the AST
+      runQueue.push({
+        plugin: astCompiler,
+        options: [],
+        stage: PipelineStage.stringify,
+        order: 0
+      });
+
+      // Logic to handle implicit parser / node input
+      const hasParser = runQueue.some(p => (p.stage ?? DefaultPipelineStage) === PipelineStage.parse);
+      const inputIsNode = isNode(this.input);
+
+      if (!hasParser) {
+          if (inputIsNode) {
+               const astFormat = MdastBasePipeline.getFormat('ast');
+               if (astFormat && astFormat.input) {
+                  for (const p of astFormat.input) {
+                    const runtimeP = this.toRuntimeEntry(p, PipelineStage.parse, options.overrides);
+                    if ((runtimeP.stage ?? DefaultPipelineStage) <= targetStage) {
+                         runQueue.push(runtimeP);
+                    }
+                  }
+               }
+          } else {
+              const mdFormat = MdastBasePipeline.getFormat('markdown');
+              if (mdFormat && mdFormat.input) {
+                 for (const p of mdFormat.input) {
+                    const runtimeP = this.toRuntimeEntry(p, PipelineStage.parse, options.overrides);
+                    if ((runtimeP.stage ?? DefaultPipelineStage) <= targetStage) {
+                        runQueue.push(runtimeP);
+                    }
+                 }
+              }
+          }
+      }
+
+      const processor = this.assembleProcessor(runQueue);
+
+      if (inputIsNode) {
+          const tree = await processor.run(this.input as any);
+          return tree as Root;
+      } else {
+          const vfile = await processor.process(this.input);
+          return vfile.result as Root;
+      }
+
+    } else {
+      const vfile = await this.to('ast', options?.overrides);
+      return vfile.result as Root;
+    }
+  }
+
+  /** Alias for toHtml() */
+  public toHTML() { return this.toHtml(); }
+  /** Alias for toAst() */
+  public toAST(options?: { stage?: PipelineStageName, overrides?: Record<string, any> }) { return this.toAst(options); }
+}
+
+MdastPipeline.register(markdownFormat);
+MdastPipeline.register(htmlFormat);
+MdastPipeline.register(astFormat);
 
 /**
  * Entry point for the fluent mdast-plus API.
@@ -222,6 +375,6 @@ export class FluentProcessor {
  * @param options - The options for mdast-plus
  * @returns A FluentProcessor instance
  */
-export function mdast(input: any, options?: MdastPlusOptions): FluentProcessor {
-  return new FluentProcessor(input, options);
+export function mdast(input: VFileCompatible): MdastPipeline {
+  return new MdastPipeline(input);
 }
