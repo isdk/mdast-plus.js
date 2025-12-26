@@ -1,4 +1,4 @@
-import { unified, type Processor } from 'unified';
+import { type Plugin, unified, type Processor } from 'unified';
 import { VFile, type VFileCompatible } from 'vfile';
 
 import type { Root } from 'mdast';
@@ -233,37 +233,51 @@ export class MdastBasePipeline {
   }
 
   /**
-   * Adds a plugin to the pipeline's compile stage.
-   * @param plugin - The unified plugin function or a MdastPlugin object.
-   * @param options - Arguments for the plugin.
+   * Adds a plugin or an array of plugins to the pipeline's compile stage.
+   * @param plugin - The unified plugin function, a MdastPlugin object, or an array of them.
+   * @param options - Arguments for the plugin(s).
    * @returns The pipeline instance for chaining.
    */
-  public use(plugin: any, ...options: any[]): this {
+  public use(plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
     return this.useAt('compile', plugin, ...options);
   }
 
   /**
-   * Adds a plugin to the pipeline at a specific stage.
+   * Adds a plugin or an array of plugins to the pipeline at a specific stage.
    * @param stage - The stage name or numeric value.
-   * @param plugin - The unified plugin function or a MdastPlugin object.
-   * @param options - Arguments for the plugin.
+   * @param plugin - The unified plugin function, a MdastPlugin object, or an array of them.
+   * @param options - Arguments for the plugin(s).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(stage: PipelineStageName, plugin: any, ...options: any[]): this;
+  public useAt(stage: PipelineStageName, plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
   /**
-   * Adds a plugin to the pipeline. The stage is taken from the plugin object.
-   * @param plugin - The MdastPlugin object.
-   * @param options - Arguments for the plugin (overrides plugin.options if provided).
+   * Adds a plugin or an array of plugins to the pipeline. The stage is taken from the plugin object(s).
+   * @param plugin - The MdastPlugin object or an array of them.
+   * @param options - Arguments for the plugin(s) (overrides plugin.options if provided).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(plugin: MdastPlugin, ...options: any[]): this;
-  public useAt(stageOrPlugin: PipelineStageName | MdastPlugin, plugin?: any, ...options: any[]): this {
+  public useAt(plugin: MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
+  public useAt(stageOrPlugin: PipelineStageName | MdastPlugin | (Plugin | MdastPlugin)[], plugin?: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
+    if (Array.isArray(stageOrPlugin)) {
+      for (const p of stageOrPlugin) {
+        this.useAt(p as any, plugin as any, ...options);
+      }
+      return this;
+    }
+
+    if (Array.isArray(plugin)) {
+      for (const p of plugin) {
+        this.useAt(stageOrPlugin as PipelineStageName, p as any, ...options);
+      }
+      return this;
+    }
+
     if (typeof stageOrPlugin === 'object' && stageOrPlugin !== null && 'plugin' in stageOrPlugin) {
       const entry = stageOrPlugin as MdastPlugin;
       const stageName = (entry.stage !== undefined)
         ? (typeof entry.stage === 'string' ? entry.stage : PipelineStage[entry.stage] as PipelineStageName)
         : 'compile';
-      
+
       const pluginOptions = (plugin !== undefined) ? [plugin, ...options] : entry.options;
 
       this.queue.push(this.toRuntimeEntry({
@@ -279,7 +293,7 @@ export class MdastBasePipeline {
             ...entry,
             options: pluginOptions,
           }, PipelineStage[stage]));
-      } else {
+      } else if (plugin) {
         this.queue.push({
           plugin,
           options,
@@ -324,7 +338,7 @@ export class MdastBasePipeline {
     for (const stage of sortedStages) {
       const plugins = stages[stage].sort((a, b) => (a.order || 0) - (b.order || 0));
       const mainIndex = plugins.findIndex(p => p.main);
-      
+
       if (mainIndex !== -1) {
         const mainPlugin = plugins[mainIndex];
         plugins.splice(mainIndex, 1);
