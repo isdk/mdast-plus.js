@@ -45,6 +45,7 @@ export class MdastBasePipeline {
 
   protected input: VFileCompatible;
   protected queue: MdastPlugin[] = [];
+  protected _data: Record<string, any> = {};
 
   /**
    * Initializes a new pipeline instance with the given input.
@@ -52,6 +53,21 @@ export class MdastBasePipeline {
    */
   constructor(input: VFileCompatible) {
     this.input = input;
+  }
+
+  /**
+   * Configures global data for the pipeline, which will be available to all plugins via this.data().
+   * @param key - Data key or a record of multiple data entries.
+   * @param value - Value to set (if key is a string).
+   * @returns The pipeline instance for chaining.
+   */
+  public data(key: string | Record<string, any>, value?: any): this {
+    if (typeof key === 'string') {
+      this._data[key] = value;
+    } else {
+      Object.assign(this._data, key);
+    }
+    return this;
   }
 
   /**
@@ -351,6 +367,9 @@ export class MdastBasePipeline {
     }
 
     const processor = unified();
+    if (Object.keys(this._data).length > 0) {
+      processor.data(this._data);
+    }
 
     for (const entry of finalQueue) {
       processor.use(entry.plugin, ...(entry.options || []));

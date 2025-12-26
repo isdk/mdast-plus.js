@@ -51,6 +51,23 @@ describe('mdast-plus fluent API', () => {
     const deleteNode = p.children[1];
     expect(deleteNode.type).toBe('delete');
   });
+
+  it('should pass data to plugins via .data()', async () => {
+    let capturedData: any;
+    const testPlugin = function (this: any) {
+      capturedData = this.data();
+      return (tree: any) => tree;
+    };
+
+    await mdast('# Hello')
+      .data('testKey', 'testValue')
+      .data({ anotherKey: 123 })
+      .use(testPlugin)
+      .toAST();
+
+    expect(capturedData.testKey).toBe('testValue');
+    expect(capturedData.anotherKey).toBe(123);
+  });
 });
 
 describe('Compliance Fixtures', () => {
