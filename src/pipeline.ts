@@ -85,7 +85,7 @@ export class MdastBasePipeline {
     entry: MdastPlugin,
     defaultStage: PipelineStage,
     overrides?: Record<string, any>
-  ): MdastPlugin {
+  ): MdastPlugin & { stage: PipelineStage } {
     let stage = defaultStage;
     if (entry.stage !== undefined) {
       if (typeof entry.stage === 'string') {
@@ -253,8 +253,8 @@ export class MdastBasePipeline {
    */
   protected assembleProcessor(queue: MdastPlugin[]): Processor {
     queue.sort((a, b) => {
-      const aStage = a.stage ?? DefaultPipelineStage;
-      const bStage = b.stage ?? DefaultPipelineStage;
+      const aStage = (a.stage as PipelineStage) ?? DefaultPipelineStage;
+      const bStage = (b.stage as PipelineStage) ?? DefaultPipelineStage;
       if (aStage !== bStage) return aStage - bStage;
       return a.order! - b.order!;
     });
@@ -262,7 +262,7 @@ export class MdastBasePipeline {
     const processor = unified();
 
     for (const entry of queue) {
-      processor.use(entry.plugin, ...entry.options);
+      processor.use(entry.plugin, ...(entry.options || []));
     }
 
     return processor;
@@ -314,7 +314,7 @@ export class MdastPipeline extends MdastBasePipeline {
       const targetStage = PipelineStage[options.stage];
       // Run only up to the specified stage
       const runQueue = this.queue.filter(p => {
-        const s = p.stage ?? DefaultPipelineStage;
+        const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
         return s <= targetStage;
       });
 
@@ -357,7 +357,6 @@ MdastPipeline.register(astFormat);
 /**
  * Entry point for the fluent mdast-plus API.
  * @param input - The input content (string or mdast tree)
- * @param options - The options for mdast-plus
  * @returns A FluentProcessor instance
  */
 export function mdast(input: VFileCompatible): MdastPipeline {

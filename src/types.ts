@@ -1,6 +1,6 @@
 import type { Plugin } from 'unified';
 import type { Parent as UnistParent } from 'unist';
-import type { Root, PhrasingContent } from 'mdast';
+import type { PhrasingContent } from 'mdast';
 import type { Properties } from 'hast';
 
 /**
@@ -32,7 +32,7 @@ export type PipelineStageName = keyof typeof PipelineStage;
  */
 export interface MdastPlugin {
   /**
-   * Optional name for the plugin. 
+   * Optional name for the plugin.
    * Used for identification in overrides and logging.
    * If not provided, defaults to the plugin function's name.
    */
