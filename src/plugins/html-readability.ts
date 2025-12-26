@@ -96,3 +96,11 @@ export const restoreReadabilityMetaPlugin = {
   stage: PipelineStage.parse,
   after: 'rehype-remark',
 };
+
+/**
+ * Combined plugins for HTML readability.
+ */
+export const htmlReadabilityPlugins = [
+  htmlReadabilityPlugin,
+  restoreReadabilityMetaPlugin,
+];

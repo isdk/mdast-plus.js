@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { htmlReadabilityPlugin, mdast, restoreReadabilityMetaPlugin } from '../src';
+import { htmlReadabilityPlugin, htmlReadabilityPlugins, mdast, restoreReadabilityMetaPlugin } from '../src';
 
 describe('HTML Readability Plugin', () => {
   const noisyHtml = `
@@ -85,5 +85,16 @@ describe('HTML Readability Plugin', () => {
       .toMarkdown();
 
     expect(md.trim()).toBe('Just a div');
+  });
+
+  it('should support htmlReadabilityPlugins array', async () => {
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins)
+      .toMarkdown();
+
+    // Main content should remain
+    expect(md).toContain('# Real Content Heading');
+    expect(md).not.toContain('Home');
   });
 });
