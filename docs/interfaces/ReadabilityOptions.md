@@ -6,7 +6,7 @@
 
 # Interface: ReadabilityOptions
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:6](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/plugins/html-readability.ts#L6)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:6](https://github.com/isdk/mdast-plus.js/blob/8870eec4ef97dd48bead818813d06479ceff9450/src/plugins/html-readability.ts#L6)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:6](https://gith
 
 > `optional` **enable**: `boolean`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/plugins/html-readability.ts#L7)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://github.com/isdk/mdast-plus.js/blob/8870eec4ef97dd48bead818813d06479ceff9450/src/plugins/html-readability.ts#L7)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://gith
 
 > `optional` **jsdom**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/plugins/html-readability.ts#L9)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/8870eec4ef97dd48bead818813d06479ceff9450/src/plugins/html-readability.ts#L9)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://gith
 
 > `optional` **readability**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:8](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/plugins/html-readability.ts#L8)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:8](https://github.com/isdk/mdast-plus.js/blob/8870eec4ef97dd48bead818813d06479ceff9450/src/plugins/html-readability.ts#L8)
