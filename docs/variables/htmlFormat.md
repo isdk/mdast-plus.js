@@ -8,7 +8,7 @@
 
 > `const` **htmlFormat**: [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/formats/html.ts:70](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/formats/html.ts#L70)
+Defined in: [packages/mdast-plus/src/formats/html.ts:71](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/formats/html.ts#L71)
 
 HTML format definition.
 

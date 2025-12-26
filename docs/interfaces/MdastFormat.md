@@ -6,7 +6,7 @@
 
 # Interface: MdastFormat
 
-Defined in: [packages/mdast-plus/src/types.ts:56](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L56)
+Defined in: [packages/mdast-plus/src/types.ts:66](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L66)
 
 Defines a document format, encompassing its input (parsing) and output (serialization) strategies.
 
@@ -16,7 +16,7 @@ Defines a document format, encompassing its input (parsing) and output (serializ
 
 > `optional` **extensions**: `string`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:62](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L62)
+Defined in: [packages/mdast-plus/src/types.ts:72](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L72)
 
 File extensions associated with this format.
 
@@ -26,7 +26,7 @@ File extensions associated with this format.
 
 > **id**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:58](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L58)
+Defined in: [packages/mdast-plus/src/types.ts:68](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L68)
 
 Unique identifier for the format (e.g., 'markdown', 'html').
 
@@ -36,7 +36,7 @@ Unique identifier for the format (e.g., 'markdown', 'html').
 
 > `optional` **input**: [`MdastPlugin`](MdastPlugin.md)[]
 
-Defined in: [packages/mdast-plus/src/types.ts:67](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L67)
+Defined in: [packages/mdast-plus/src/types.ts:77](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L77)
 
 Plugins used for reading this format into a standard AST (Parser + Normalizer).
 
@@ -46,7 +46,7 @@ Plugins used for reading this format into a standard AST (Parser + Normalizer).
 
 > `optional` **mediaTypes**: `string`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:64](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L64)
+Defined in: [packages/mdast-plus/src/types.ts:74](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L74)
 
 MIME types associated with this format.
 
@@ -56,7 +56,7 @@ MIME types associated with this format.
 
 > `optional` **output**: [`MdastPlugin`](MdastPlugin.md)[]
 
-Defined in: [packages/mdast-plus/src/types.ts:70](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L70)
+Defined in: [packages/mdast-plus/src/types.ts:80](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L80)
 
 Plugins used for serializing the AST into this format (Finalizer + Stringifier).
 
@@ -66,6 +66,6 @@ Plugins used for serializing the AST into this format (Finalizer + Stringifier).
 
 > `optional` **title**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:60](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L60)
+Defined in: [packages/mdast-plus/src/types.ts:70](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L70)
 
 Human-readable title.

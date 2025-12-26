@@ -6,7 +6,7 @@
 
 # Class: MdastPipeline
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:275](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L275)
+Defined in: [packages/mdast-plus/src/pipeline.ts:399](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L399)
 
 Extended pipeline with convenience methods for common formats.
 
@@ -20,7 +20,7 @@ Extended pipeline with convenience methods for common formats.
 
 > **new MdastPipeline**(`input`): `MdastPipeline`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:53](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L53)
+Defined in: [packages/mdast-plus/src/pipeline.ts:54](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L54)
 
 Initializes a new pipeline instance with the given input.
 
@@ -42,11 +42,23 @@ Content to process (string, Buffer, VFile, or AST Node).
 
 ## Properties
 
+### \_data
+
+> `protected` **\_data**: `Record`\<`string`, `any`\> = `{}`
+
+Defined in: [packages/mdast-plus/src/pipeline.ts:48](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L48)
+
+#### Inherited from
+
+[`MdastBasePipeline`](MdastBasePipeline.md).[`_data`](MdastBasePipeline.md#_data)
+
+***
+
 ### input
 
 > `protected` **input**: `Compatible`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:46](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L46)
+Defined in: [packages/mdast-plus/src/pipeline.ts:46](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L46)
 
 #### Inherited from
 
@@ -58,7 +70,7 @@ Defined in: [packages/mdast-plus/src/pipeline.ts:46](https://github.com/isdk/mda
 
 > `protected` **queue**: [`MdastPlugin`](../interfaces/MdastPlugin.md)[] = `[]`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:47](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L47)
+Defined in: [packages/mdast-plus/src/pipeline.ts:47](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L47)
 
 #### Inherited from
 
@@ -70,7 +82,7 @@ Defined in: [packages/mdast-plus/src/pipeline.ts:47](https://github.com/isdk/mda
 
 > `protected` **assembleProcessor**(`queue`): `Processor`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:254](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L254)
+Defined in: [packages/mdast-plus/src/pipeline.ts:326](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L326)
 
 Assembles a unified processor based on the sorted plugin queue.
 
@@ -90,11 +102,45 @@ Assembles a unified processor based on the sorted plugin queue.
 
 ***
 
+### data()
+
+> **data**(`key`, `value?`): `this`
+
+Defined in: [packages/mdast-plus/src/pipeline.ts:64](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L64)
+
+Configures global data for the pipeline, which will be available to all plugins via this.data().
+
+#### Parameters
+
+##### key
+
+Data key or a record of multiple data entries.
+
+`string` | `Record`\<`string`, `any`\>
+
+##### value?
+
+`any`
+
+Value to set (if key is a string).
+
+#### Returns
+
+`this`
+
+The pipeline instance for chaining.
+
+#### Inherited from
+
+[`MdastBasePipeline`](MdastBasePipeline.md).[`data`](MdastBasePipeline.md#data)
+
+***
+
 ### ensureInputPlugins()
 
 > `protected` **ensureInputPlugins**(`queue`, `overrides?`, `maxStage?`): `void`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:123](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L123)
+Defined in: [packages/mdast-plus/src/pipeline.ts:149](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L149)
 
 Ensures that input plugins (parser, normalizers) are present in the queue.
 Adds implicit plugins if no parser is detected.
@@ -127,7 +173,7 @@ Adds implicit plugins if no parser is detected.
 
 > **from**(`fmt`, `overrides?`): `this`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:152](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L152)
+Defined in: [packages/mdast-plus/src/pipeline.ts:178](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L178)
 
 Configures the input format and adds its associated plugins to the pipeline.
 
@@ -161,7 +207,7 @@ The pipeline instance for chaining.
 
 > **getFormat**(`id`): `undefined` \| [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:60](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L60)
+Defined in: [packages/mdast-plus/src/pipeline.ts:76](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L76)
 
 Instance-level access to the global format registry.
 
@@ -185,7 +231,7 @@ Instance-level access to the global format registry.
 
 > **priority**(`order`): `this`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:242](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L242)
+Defined in: [packages/mdast-plus/src/pipeline.ts:314](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L314)
 
 Sets the priority order for the most recently added plugin.
 Plugins with lower order run earlier within the same stage.
@@ -214,7 +260,7 @@ The pipeline instance for chaining.
 
 > **to**(`fmt`, `overrides?`): `Promise`\<`VFile`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:172](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L172)
+Defined in: [packages/mdast-plus/src/pipeline.ts:198](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L198)
 
 Processes the pipeline and serializes the result into the specified format.
 
@@ -248,7 +294,7 @@ A promise resolving to a VFile containing the result.
 
 > **toAst**(`options?`): `Promise`\<`Root`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:312](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L312)
+Defined in: [packages/mdast-plus/src/pipeline.ts:436](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L436)
 
 Finalizes the pipeline and returns the resulting AST (Root node).
 
@@ -280,7 +326,7 @@ Run the pipeline up to this stage only.
 
 > **toAST**(`options?`): `Promise`\<`Root`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:350](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L350)
+Defined in: [packages/mdast-plus/src/pipeline.ts:474](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L474)
 
 Alias for toAst()
 
@@ -306,7 +352,7 @@ Alias for toAst()
 
 > **toHtml**(): `Promise`\<`string`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:294](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L294)
+Defined in: [packages/mdast-plus/src/pipeline.ts:418](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L418)
 
 Finalizes the pipeline and returns the result as an HTML string.
 
@@ -320,7 +366,7 @@ Finalizes the pipeline and returns the result as an HTML string.
 
 > **toHTML**(): `Promise`\<`string`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:348](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L348)
+Defined in: [packages/mdast-plus/src/pipeline.ts:472](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L472)
 
 Alias for toHtml()
 
@@ -334,7 +380,7 @@ Alias for toHtml()
 
 > **toHtmlVFile**(): `Promise`\<`VFile`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:302](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L302)
+Defined in: [packages/mdast-plus/src/pipeline.ts:426](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L426)
 
 Finalizes the pipeline and returns a VFile containing the HTML result.
 
@@ -348,7 +394,7 @@ Finalizes the pipeline and returns a VFile containing the HTML result.
 
 > **toMarkdown**(): `Promise`\<`string`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:279](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L279)
+Defined in: [packages/mdast-plus/src/pipeline.ts:403](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L403)
 
 Finalizes the pipeline and returns the result as a Markdown string.
 
@@ -362,7 +408,7 @@ Finalizes the pipeline and returns the result as a Markdown string.
 
 > **toMarkdownVFile**(): `Promise`\<`VFile`\>
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:287](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L287)
+Defined in: [packages/mdast-plus/src/pipeline.ts:411](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L411)
 
 Finalizes the pipeline and returns a VFile containing the Markdown result.
 
@@ -376,7 +422,7 @@ Finalizes the pipeline and returns a VFile containing the Markdown result.
 
 > `protected` **toRuntimeEntry**(`entry`, `defaultStage`, `overrides?`): [`MdastPlugin`](../interfaces/MdastPlugin.md) & `object`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:84](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L84)
+Defined in: [packages/mdast-plus/src/pipeline.ts:100](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L100)
 
 Normalizes a plugin entry for runtime execution.
 
@@ -408,23 +454,23 @@ Normalizes a plugin entry for runtime execution.
 
 > **use**(`plugin`, ...`options`): `this`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:215](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L215)
+Defined in: [packages/mdast-plus/src/pipeline.ts:241](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L241)
 
-Adds a plugin to the pipeline's compile stage.
+Adds a plugin or an array of plugins to the pipeline's compile stage.
 
 #### Parameters
 
 ##### plugin
 
-`any`
+The unified plugin function, a MdastPlugin object, or an array of them.
 
-The unified plugin function.
+[`MdastPlugin`](../interfaces/MdastPlugin.md) | `Plugin` | ([`MdastPlugin`](../interfaces/MdastPlugin.md) \| `Plugin`)[]
 
 ##### options
 
 ...`any`[]
 
-Arguments for the plugin.
+Arguments for the plugin(s).
 
 #### Returns
 
@@ -440,39 +486,73 @@ The pipeline instance for chaining.
 
 ### useAt()
 
+#### Call Signature
+
 > **useAt**(`stage`, `plugin`, ...`options`): `this`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:226](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L226)
+Defined in: [packages/mdast-plus/src/pipeline.ts:252](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L252)
 
-Adds a plugin to the pipeline at a specific stage.
+Adds a plugin or an array of plugins to the pipeline at a specific stage.
 
-#### Parameters
+##### Parameters
 
-##### stage
+###### stage
 
 The stage name or numeric value.
 
 `"parse"` | `"normalize"` | `"compile"` | `"finalize"` | `"stringify"`
 
-##### plugin
+###### plugin
 
-`any`
+The unified plugin function, a MdastPlugin object, or an array of them.
 
-The unified plugin function.
+[`MdastPlugin`](../interfaces/MdastPlugin.md) | `Plugin` | ([`MdastPlugin`](../interfaces/MdastPlugin.md) \| `Plugin`)[]
 
-##### options
+###### options
 
 ...`any`[]
 
-Arguments for the plugin.
+Arguments for the plugin(s).
 
-#### Returns
+##### Returns
 
 `this`
 
 The pipeline instance for chaining.
 
-#### Inherited from
+##### Inherited from
+
+[`MdastBasePipeline`](MdastBasePipeline.md).[`useAt`](MdastBasePipeline.md#useat)
+
+#### Call Signature
+
+> **useAt**(`plugin`, ...`options`): `this`
+
+Defined in: [packages/mdast-plus/src/pipeline.ts:259](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L259)
+
+Adds a plugin or an array of plugins to the pipeline. The stage is taken from the plugin object(s).
+
+##### Parameters
+
+###### plugin
+
+The MdastPlugin object or an array of them.
+
+[`MdastPlugin`](../interfaces/MdastPlugin.md) | ([`MdastPlugin`](../interfaces/MdastPlugin.md) \| `Plugin`)[]
+
+###### options
+
+...`any`[]
+
+Arguments for the plugin(s) (overrides plugin.options if provided).
+
+##### Returns
+
+`this`
+
+The pipeline instance for chaining.
+
+##### Inherited from
 
 [`MdastBasePipeline`](MdastBasePipeline.md).[`useAt`](MdastBasePipeline.md#useat)
 
@@ -482,7 +562,7 @@ The pipeline instance for chaining.
 
 > `static` **getFormat**(`id`): `undefined` \| [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:42](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L42)
+Defined in: [packages/mdast-plus/src/pipeline.ts:42](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L42)
 
 Retrieves a registered format by its ID.
 
@@ -510,7 +590,7 @@ The format definition or undefined if not found.
 
 > `static` **register**(`format`): `void`
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:33](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L33)
+Defined in: [packages/mdast-plus/src/pipeline.ts:33](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L33)
 
 Registers a global document format.
 

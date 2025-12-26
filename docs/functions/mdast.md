@@ -8,7 +8,7 @@
 
 > **mdast**(`input`): [`MdastPipeline`](../classes/MdastPipeline.md)
 
-Defined in: [packages/mdast-plus/src/pipeline.ts:362](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/pipeline.ts#L362)
+Defined in: [packages/mdast-plus/src/pipeline.ts:486](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/pipeline.ts#L486)
 
 Entry point for the fluent mdast-plus API.
 

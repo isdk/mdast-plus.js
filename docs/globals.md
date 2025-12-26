@@ -21,6 +21,7 @@
 - [MdastPlugin](interfaces/MdastPlugin.md)
 - [MdastSub](interfaces/MdastSub.md)
 - [MdastSup](interfaces/MdastSup.md)
+- [ReadabilityOptions](interfaces/ReadabilityOptions.md)
 
 ## Type Aliases
 
@@ -31,7 +32,11 @@
 - [astFormat](variables/astFormat.md)
 - [DefaultPipelineStage](variables/DefaultPipelineStage.md)
 - [htmlFormat](variables/htmlFormat.md)
+- [htmlReadability](variables/htmlReadability.md)
+- [htmlReadabilityPlugin](variables/htmlReadabilityPlugin.md)
+- [htmlReadabilityPlugins](variables/htmlReadabilityPlugins.md)
 - [markdownFormat](variables/markdownFormat.md)
+- [restoreReadabilityMetaPlugin](variables/restoreReadabilityMetaPlugin.md)
 
 ## Functions
 

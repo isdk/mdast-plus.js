@@ -6,7 +6,7 @@
 
 # Interface: MdastMark
 
-Defined in: [packages/mdast-plus/src/types.ts:87](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L87)
+Defined in: [packages/mdast-plus/src/types.ts:97](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L97)
 
 Represents a highlighted text (mark) node in mdast.
 
@@ -20,7 +20,7 @@ Represents a highlighted text (mark) node in mdast.
 
 > **children**: `PhrasingContent`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:89](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L89)
+Defined in: [packages/mdast-plus/src/types.ts:99](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L99)
 
 List of children.
 
@@ -65,7 +65,7 @@ have a position.
 
 > **type**: `"mark"`
 
-Defined in: [packages/mdast-plus/src/types.ts:88](https://github.com/isdk/mdast-plus.js/blob/bacb4922529058fef775e3f4b4e71c98ac1cab17/src/types.ts#L88)
+Defined in: [packages/mdast-plus/src/types.ts:98](https://github.com/isdk/mdast-plus.js/blob/2e4b3f4f8f9f2537173553e02c79170d79418c86/src/types.ts#L98)
 
 Node type.
 

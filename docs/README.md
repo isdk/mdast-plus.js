@@ -75,12 +75,18 @@ const rawAst = await mdast('==Highlighted==').toAST({ stage: 'parse' });
 ### Advanced Pipeline
 
 ```typescript
-const { content, assets } = await mdast(myInput)
+import { htmlReadabilityPlugins } from '@isdk/mdast-plus';
+
+const vfile = await mdast(myInput)
   .data({ myGlobal: 'value' })
-  // Add a custom plugin at the 'compile' stage
-  .useAt('compile', myPlugin, { option: 1 })
+  // Add multiple plugins as an array at the 'compile' stage
+  .use([pluginA, pluginB])
+  // Or add a set of plugins at a specific stage
+  .useAt('parse', htmlReadabilityPlugins)
   .priority(10) // Run later than default plugins
   .to('html');
+
+console.log(vfile.value); // The serialized HTML string
 ```
 
 ### Plugin Behavior
@@ -129,13 +135,19 @@ const result = await mdast('Hello').to('reverse');
 
 ## Staged Processing
 
-Plugins are executed based on their `stage` and `order`:
+Plugins are executed based on their `stage`, `order`, and semantic constraints (`before`/`after`):
 
 1.  **parse** (0): Input parsing (e.g., `remark-parse`).
 2.  **normalize** (100): Cleanup and canonicalize the tree.
 3.  **compile** (200): High-level semantic transformations.
 4.  **finalize** (300): Final preparation before output (e.g. `rehype-sanitize`).
 5.  **stringify** (400): Output generation.
+
+### Main Plugin Replacement
+
+Each stage can have one "main" plugin. If a plugin is marked with `main: true`, it will **replace** the first plugin in that same stage. This is useful for swapping out default parsers or compilers while keeping the rest of the pipeline intact.
+
+> **Note**: Only one main plugin is allowed per stage. If multiple plugins are marked as main, only the last one defined will take effect as the replacement.
 
 ## Core Plugins Included
 
@@ -146,6 +158,7 @@ Plugins are executed based on their `stage` and `order`:
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
 | `normalize-inline-styles` | normalize | Standardizes `==mark==`, `~sub~`, and `^sup^`. |
+| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Use `htmlReadabilityPlugins` array for easier setup. |
 
 ## Contributing
 

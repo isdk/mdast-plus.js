@@ -71,12 +71,18 @@ const rawAst = await mdast('==高亮内容==').toAST({ stage: 'parse' });
 ### 高级工作流
 
 ```typescript
-const { content, assets } = await mdast(myInput)
+import { htmlReadabilityPlugins } from '@isdk/mdast-plus';
+
+const vfile = await mdast(myInput)
   .data({ myGlobal: 'value' })
-  // 在 'compile' 阶段添加自定义插件
-  .useAt('compile', myPlugin, { option: 1 })
+  // 以数组形式在 'compile' 阶段添加多个插件
+  .use([pluginA, pluginB])
+  // 或在特定阶段添加一组插件
+  .useAt('parse', htmlReadabilityPlugins)
   .priority(10) // 比默认插件更晚执行
   .to('html');
+
+console.log(vfile.value); // 序列化后的 HTML 字符串
 ```
 
 ### 插件行为
@@ -125,13 +131,19 @@ const result = await mdast('Hello').to('reverse');
 
 ## 分阶段处理
 
-插件根据它们的 `stage` (阶段) 和 `order` (顺序) 执行：
+插件根据它们的 `stage` (阶段)、`order` (顺序) 以及语义约束 (`before`/`after`) 执行：
 
-1.  **parse** (0): 输入解析 (例如 `remark-parse`)。
-2.  **normalize** (100): 清理并规范化树。
-3.  **compile** (200): 高级语义转换。
-4.  **finalize** (300): 输出前的最后准备 (例如 `rehype-sanitize`)。
-5.  **stringify** (400): 输出生成。
+1. **parse** (0): 输入解析 (例如 `remark-parse`)。
+2. **normalize** (100): 清理并规范化树。
+3. **compile** (200): 高级语义转换。
+4. **finalize** (300): 输出前的最后准备 (例如 `rehype-sanitize`)。
+5. **stringify** (400): 输出生成。
+
+### 主插件替换 (Main Plugin Replacement)
+
+每个阶段可以有一个“主”插件。如果一个插件被标记为 `main: true`，它将 **替换** 该阶段中的第一个插件。这对于在保持管道其余部分不变的情况下更换默认解析器或编译器非常有用。
+
+> **注意**: 每个阶段只允许存在一个主插件。如果多个插件被标记为 main，则只有最后定义的那个会作为替换生效。
 
 ## 内置核心插件
 
@@ -142,6 +154,7 @@ const result = await mdast('Hello').to('reverse');
 | `extract-code-meta` | normalize | 从代码块元数据中解析 `title="foo"`。 |
 | `image-size` | normalize | 从图片 URL 中解析 `#=WxH`。 |
 | `normalize-inline-styles` | normalize | 标准化 `==mark==`、`~sub~` 和 `^sup^`。 |
+| `html-readability` | parse | 使用 Mozilla 的 Readability 从 HTML 中提取主体内容。使用 `htmlReadabilityPlugins` 数组可以简化配置。 |
 
 ## 贡献
 
