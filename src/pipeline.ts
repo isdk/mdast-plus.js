@@ -102,7 +102,14 @@ export class MdastBasePipeline {
     if (overrides && pluginName) {
         if (pluginName in overrides) {
             const override = overrides[pluginName];
-            options = Array.isArray(override) ? override : [override];
+            if (typeof override === 'object' && override !== null && !Array.isArray(override)) {
+                if ('main' in override) entry.main = !!override.main;
+                if ('before' in override) entry.before = override.before;
+                if ('after' in override) entry.after = override.after;
+                options = [override];
+            } else {
+                options = Array.isArray(override) ? override : [override];
+            }
         }
     }
 
@@ -111,7 +118,10 @@ export class MdastBasePipeline {
       plugin: entry.plugin,
       options,
       stage,
-      order: entry.order || 0
+      order: entry.order || 0,
+      main: entry.main,
+      before: entry.before,
+      after: entry.after
     };
   }
 
@@ -208,7 +218,7 @@ export class MdastBasePipeline {
 
   /**
    * Adds a plugin to the pipeline's compile stage.
-   * @param plugin - The unified plugin function.
+   * @param plugin - The unified plugin function or a MdastPlugin object.
    * @param options - Arguments for the plugin.
    * @returns The pipeline instance for chaining.
    */
@@ -219,17 +229,49 @@ export class MdastBasePipeline {
   /**
    * Adds a plugin to the pipeline at a specific stage.
    * @param stage - The stage name or numeric value.
-   * @param plugin - The unified plugin function.
+   * @param plugin - The unified plugin function or a MdastPlugin object.
    * @param options - Arguments for the plugin.
    * @returns The pipeline instance for chaining.
    */
-  public useAt(stage: PipelineStageName, plugin: any, ...options: any[]): this {
-    this.queue.push({
-      plugin,
-      options,
-      stage: PipelineStage[stage],
-      order: 0
-    });
+  public useAt(stage: PipelineStageName, plugin: any, ...options: any[]): this;
+  /**
+   * Adds a plugin to the pipeline. The stage is taken from the plugin object.
+   * @param plugin - The MdastPlugin object.
+   * @param options - Arguments for the plugin (overrides plugin.options if provided).
+   * @returns The pipeline instance for chaining.
+   */
+  public useAt(plugin: MdastPlugin, ...options: any[]): this;
+  public useAt(stageOrPlugin: PipelineStageName | MdastPlugin, plugin?: any, ...options: any[]): this {
+    if (typeof stageOrPlugin === 'object' && stageOrPlugin !== null && 'plugin' in stageOrPlugin) {
+      const entry = stageOrPlugin as MdastPlugin;
+      const stageName = (entry.stage !== undefined)
+        ? (typeof entry.stage === 'string' ? entry.stage : PipelineStage[entry.stage] as PipelineStageName)
+        : 'compile';
+      
+      const pluginOptions = (plugin !== undefined) ? [plugin, ...options] : entry.options;
+
+      this.queue.push(this.toRuntimeEntry({
+        ...entry,
+        options: pluginOptions,
+      }, PipelineStage[stageName]));
+    } else {
+      const stage = stageOrPlugin as PipelineStageName;
+      if (typeof plugin === 'object' && plugin !== null && 'plugin' in plugin) {
+        const entry = plugin as MdastPlugin;
+        const pluginOptions = options.length > 0 ? options : entry.options;
+        this.queue.push(this.toRuntimeEntry({
+            ...entry,
+            options: pluginOptions,
+          }, PipelineStage[stage]));
+      } else {
+        this.queue.push({
+          plugin,
+          options,
+          stage: PipelineStage[stage],
+          order: 0
+        });
+      }
+    }
     return this;
   }
 
@@ -252,16 +294,65 @@ export class MdastBasePipeline {
    * @protected
    */
   protected assembleProcessor(queue: MdastPlugin[]): Processor {
-    queue.sort((a, b) => {
-      const aStage = (a.stage as PipelineStage) ?? DefaultPipelineStage;
-      const bStage = (b.stage as PipelineStage) ?? DefaultPipelineStage;
-      if (aStage !== bStage) return aStage - bStage;
-      return a.order! - b.order!;
-    });
+    // 1. Group by stage and handle 'main' replacement
+    const stages: Record<number, MdastPlugin[]> = {};
+    for (const entry of queue) {
+      const stage = (entry.stage as PipelineStage) ?? DefaultPipelineStage;
+      if (!stages[stage]) stages[stage] = [];
+      stages[stage].push(entry);
+    }
+
+    const finalQueue: MdastPlugin[] = [];
+    const sortedStages = Object.keys(stages).map(Number).sort((a, b) => a - b);
+
+    for (const stage of sortedStages) {
+      const plugins = stages[stage].sort((a, b) => (a.order || 0) - (b.order || 0));
+      const mainIndex = plugins.findIndex(p => p.main);
+      
+      if (mainIndex !== -1) {
+        const mainPlugin = plugins[mainIndex];
+        plugins.splice(mainIndex, 1);
+        plugins[0] = mainPlugin;
+      }
+
+      // Semantic re-ordering (before/after)
+      // A simple multi-pass approach for basic constraints
+      let changed = true;
+      let passes = 0;
+      while (changed && passes < plugins.length) {
+        changed = false;
+        passes++;
+        for (let i = 0; i < plugins.length; i++) {
+          const p = plugins[i];
+          if (p.after) {
+            const targetIdx = plugins.findIndex(t => t.name === p.after);
+            if (targetIdx !== -1 && targetIdx > i) {
+              // Move p after target
+              plugins.splice(i, 1);
+              plugins.splice(targetIdx, 0, p);
+              changed = true;
+              break;
+            }
+          }
+          if (p.before) {
+            const targetIdx = plugins.findIndex(t => t.name === p.before);
+            if (targetIdx !== -1 && targetIdx < i) {
+              // Move p before target
+              plugins.splice(i, 1);
+              plugins.splice(targetIdx, 0, p);
+              changed = true;
+              break;
+            }
+          }
+        }
+      }
+
+      finalQueue.push(...plugins);
+    }
 
     const processor = unified();
 
-    for (const entry of queue) {
+    for (const entry of finalQueue) {
       processor.use(entry.plugin, ...(entry.options || []));
     }
 

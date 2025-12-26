@@ -48,6 +48,16 @@ export interface MdastPlugin {
   stage?: PipelineStage | PipelineStageName;
   /** Execution priority within the same stage. Lower values run earlier. */
   order?: number;
+  /**
+   * If true, this plugin is considered the "main" plugin for its stage.
+   * When multiple plugins exist in the same stage, a 'main' plugin will
+   * replace the default (first) plugin of that stage.
+   */
+  main?: boolean;
+  /** Run this plugin before the named plugin (within the same stage). */
+  before?: string;
+  /** Run this plugin after the named plugin (within the same stage). */
+  after?: string;
 }
 
 /**
@@ -109,6 +119,7 @@ declare module 'mdast' {
     hProperties?: Properties;
     /** Source origin information */
     _origin?: MdastDataOrigin;
+    [k: string]: any;
   }
 
   interface CodeData extends Data {

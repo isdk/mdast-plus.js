@@ -13,10 +13,12 @@ import { PipelineStage } from '../types';
  */
 const htmlInputPlugins: MdastPlugin[] = [
   {
+    name: 'rehype-parse',
     plugin: rehypeParse,
     stage: PipelineStage.parse,
   },
   {
+    name: 'rehype-remark',
     plugin: rehypeRemark,
     options: [{
       handlers: {
@@ -24,7 +26,6 @@ const htmlInputPlugins: MdastPlugin[] = [
       },
     }],
     stage: PipelineStage.parse,
-    order: 10, // Run after parse
   },
 ];
 

@@ -100,4 +100,70 @@ describe('Plugin Stage and Order', () => {
       'implicit-2'
     ]);
   });
+
+  it('should handle semantic re-ordering (before/after)', async () => {
+    const executionOrder: string[] = [];
+
+    const createPlugin = (name: string, options: any = {}) => ({
+      name,
+      plugin: function() {
+        return (tree: any) => {
+          executionOrder.push(name);
+        };
+      },
+      ...options
+    });
+
+    // 1. Basic before/after
+    // Added order: B, A(before:B), C(after:B) -> Expected: A, B, C
+    await mdast('# test')
+      .useAt(createPlugin('B'))
+      .useAt(createPlugin('A', { before: 'B' }))
+      .useAt(createPlugin('C', { after: 'B' }))
+      .toHTML();
+
+    let filteredOrder = executionOrder.filter(name => ['A', 'B', 'C'].includes(name));
+    expect(filteredOrder).toEqual(['A', 'B', 'C']);
+
+    executionOrder.length = 0;
+
+    // 2. Complex dependencies
+    // Added order: D, C(before:D), B(before:C), A(before:B) -> Expected: A, B, C, D
+    await mdast('# test')
+      .useAt(createPlugin('D'))
+      .useAt(createPlugin('C', { before: 'D' }))
+      .useAt(createPlugin('B', { before: 'C' }))
+      .useAt(createPlugin('A', { before: 'B' }))
+      .toHTML();
+
+    filteredOrder = executionOrder.filter(name => ['A', 'B', 'C', 'D'].includes(name));
+    expect(filteredOrder).toEqual(['A', 'B', 'C', 'D']);
+
+    executionOrder.length = 0;
+
+    // 3. Mixed after dependencies
+    // Added order: A, B(after:A), C(after:B), D(after:C) -> Expected: A, B, C, D
+    // (Note: they are already in order, should stay stable)
+    await mdast('# test')
+      .useAt(createPlugin('A'))
+      .useAt(createPlugin('B', { after: 'A' }))
+      .useAt(createPlugin('C', { after: 'B' }))
+      .useAt(createPlugin('D', { after: 'C' }))
+      .toHTML();
+
+    filteredOrder = executionOrder.filter(name => ['A', 'B', 'C', 'D'].includes(name));
+    expect(filteredOrder).toEqual(['A', 'B', 'C', 'D']);
+
+    executionOrder.length = 0;
+
+    // 4. Moving earlier to later with after
+    // Added order: A(after:B), B -> Expected: B, A
+    await mdast('# test')
+      .useAt(createPlugin('A', { after: 'B' }))
+      .useAt(createPlugin('B'))
+      .toHTML();
+
+    filteredOrder = executionOrder.filter(name => ['A', 'B'].includes(name));
+    expect(filteredOrder).toEqual(['B', 'A']);
+  });
 });
