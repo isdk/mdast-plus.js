@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.1.3](https://github.com/isdk/mdast-plus.js/compare/v0.1.2...v0.1.3) (2025-12-26)
+
+
+### Features
+
+* add Options passed ([ce6186c](https://github.com/isdk/mdast-plus.js/commit/ce6186cf4fa995aa423c33340269c4d29f79c4dc))
+* enhance plugin identification and document behavior ([26fdd1b](https://github.com/isdk/mdast-plus.js/commit/26fdd1bb606481888e9247cabb7acd04dd14f936))
+
+
+### Bug Fixes
+
+* resolve typescript type hint errors in pipeline.ts ([bacb492](https://github.com/isdk/mdast-plus.js/commit/bacb4922529058fef775e3f4b4e71c98ac1cab17))
+
+
+### Refactor
+
+* implement unified-native stage-based pipeline architecture and add TSDoc ([3ad805b](https://github.com/isdk/mdast-plus.js/commit/3ad805b596ca94d6626aeac3018ddf3ac5af49d0))
+
 ## [0.1.2](https://github.com/isdk/mdast-plus.js/compare/v0.1.1...v0.1.2) (2025-12-24)
 
 
