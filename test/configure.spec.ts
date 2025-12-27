@@ -51,7 +51,7 @@ describe('MdastPipeline.configure', () => {
     }
 
     const result = await mdast('# Hello')
-      .use(namedPlugin, { val: 'initial' })
+      .use(namedPlugin as any, { val: 'initial' })
       .configure('namedPlugin', { val: 'configured' })
       .toAst();
 
