@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { mdast } from '../src';
+import { describe, it, expect, vi } from 'vitest';
+import { mdast, PipelineStage } from '../src';
 import rehypeParse from 'rehype-parse';
 import rehypeRemark from 'rehype-remark';
 
@@ -36,6 +36,26 @@ describe('mdast-plus fluent API', () => {
     expect(bodyChildren[1].children[0].value).toBe('root2')
   });
 
+  it('should pass rehype options for parsing (fragment: true)', async () => {
+    const input = '<div>root1</div><div>root2</div>';
+    // To pass options now, we can register a custom format or add the plugin with options.
+    // Here we'll just test that we can get a full document if we use rehype-parse with fragment: false
+    // We only use rehypeParse to verify HAST structure (element/html/body), skipping rehypeRemark which would convert to MDAST.
+    const ast: any = await mdast(input)
+        .useAt('parse', rehypeParse, { fragment: true })
+        .toAST();
+
+    // Expect the AST to represent a full HTML document structure
+    expect(ast.type).toBe('root');
+    const bodyChildren = ast.children as any;
+
+    expect(bodyChildren[0].type).toBe('element');
+    expect(bodyChildren[0].tagName).toBe('div');
+    expect(bodyChildren[0].children[0].value).toBe('root1'); // Check text content
+    expect(bodyChildren[1].tagName).toBe('div');
+    expect(bodyChildren[1].children[0].value).toBe('root2'); // Check text content
+  });
+
   it('should allow overriding plugin options (e.g. remark-gfm)', async () => {
     // Default GFM requires ~~ for strikethrough.
     // We configure singleTilde: true to allow ~ for strikethrough.
@@ -67,6 +87,24 @@ describe('mdast-plus fluent API', () => {
 
     expect(capturedData.testKey).toBe('testValue');
     expect(capturedData.anotherKey).toBe(123);
+  });
+
+  it('should use MdastPlugin stage always', async () => {
+    const plugin = vi.fn((options) => (tree: any) => tree);
+    const mdastPlugin = {
+      plugin,
+      stage: PipelineStage.parse, // Internal stage: PARSE (0)
+      name: 'test-plugin'
+    };
+
+    const pipeline = mdast('# Hello');
+
+    // Explicitly ask for COMPILE (200)
+    pipeline.useAt(PipelineStage.compile, mdastPlugin);
+
+    // @ts-ignore: access private queue
+    const addedPlugin = pipeline.queue.find(p => p.name === 'test-plugin')!;
+    expect(addedPlugin.stage).toBe(PipelineStage.parse);
   });
 });
 

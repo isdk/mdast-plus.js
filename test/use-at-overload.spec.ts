@@ -58,4 +58,35 @@ describe('MdastPipeline useAt overload', () => {
     const lastPlugin = pipeline.queue[pipeline.queue.length - 1];
     expect(lastPlugin.stage).toBe(PipelineStage.compile);
   });
+
+  it('should support numeric PipelineStage in useAt', async () => {
+    const plugin = vi.fn((options) => (tree: any) => tree);
+    const pipeline = mdast('# Hello')
+      .useAt(PipelineStage.normalize, plugin, { foo: 'bar' });
+    
+    // @ts-ignore: access private queue for testing
+    const lastPlugin = pipeline.queue[pipeline.queue.length - 1];
+    expect(lastPlugin.stage).toBe(PipelineStage.normalize);
+
+    await pipeline.toAst();
+    expect(plugin).toHaveBeenCalledWith({ foo: 'bar' });
+  });
+
+  it('should support numeric PipelineStage in toAst', async () => {
+    const plugin = vi.fn((options) => (tree: any) => tree);
+    const pipeline = mdast('# Hello')
+      .useAt(PipelineStage.normalize, plugin);
+    
+    await pipeline.toAst({ stage: PipelineStage.normalize });
+    expect(plugin).toHaveBeenCalled();
+
+    const pluginCompile = vi.fn((options) => (tree: any) => tree);
+    pipeline.useAt(PipelineStage.compile, pluginCompile);
+
+    await pipeline.toAst({ stage: PipelineStage.normalize });
+    expect(pluginCompile).not.toHaveBeenCalled();
+
+    await pipeline.toAst({ stage: PipelineStage.compile });
+    expect(pluginCompile).toHaveBeenCalled();
+  });
 });
