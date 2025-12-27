@@ -4,29 +4,24 @@ import { fromHtml } from 'hast-util-from-html';
 import { PipelineStage } from '../types';
 
 export interface ReadabilityOptions {
-  enable?: boolean;
-  readability?: Record<string, any>;
+  // the url of the HTML document
+  url?: string;
+  readability?: Record<string, any> | false;
   jsdom?: Record<string, any>;
+  'rehype-parse'?: Record<string, any>;
 }
 
 /**
  * A unified/rehype plugin that uses Mozilla's Readability to parse the input HTML.
  */
-export const htmlReadability: Plugin<[(ReadabilityOptions | boolean)?], string, Root> = function (options) {
-  let settings: ReadabilityOptions = {};
-  if (typeof options === 'boolean') {
-    settings = { enable: options };
-  } else if (options) {
-    settings = options;
-  }
-
-  const { enable, readability: readabilityOptions, jsdom: jsdomOptions } = settings;
-
-  if (enable === false) {
-    return;
-  }
+export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = function (options) {
+  const { readability: readabilityOptions, jsdom: jsdomOptions, url } = options || {};
 
   this.parser = function (doc: string, file: any) {
+    if (readabilityOptions === false) {
+      return fromHtml(doc, { fragment: true });
+    }
+
     let JSDOM: any;
     let Readability: any;
 
@@ -39,8 +34,15 @@ export const htmlReadability: Plugin<[(ReadabilityOptions | boolean)?], string, 
       throw new Error(`[html-readability] Dependency missing. Please install 'jsdom' and '@mozilla/readability'.`);
     }
 
-    const dom = new JSDOM(doc, jsdomOptions);
-    const reader = new Readability(dom.window.document, readabilityOptions);
+    const dom = new JSDOM(doc, {url, pretendToBeVisual: true, ...jsdomOptions});
+    const reader = new Readability(dom.window.document, {
+      // debug: true,
+      maxElemsToParse: 100000,
+      nbTopCandidates: 5,
+      charThreshold: 500,
+      keepClasses: true,
+      ...readabilityOptions,
+    });
     const article = reader.parse();
 
     if (!article || !article.content) {
@@ -78,6 +80,7 @@ export const htmlReadabilityPlugin = {
   name: 'readability',
   plugin: htmlReadability,
   stage: PipelineStage.parse,
+  main: true,
   // If it acts as main, it will replace the first parser.
   // We can add 'after' but 'main: true' is stronger for parsers.
 };

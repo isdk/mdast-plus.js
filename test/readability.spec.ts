@@ -37,7 +37,7 @@ describe('HTML Readability Plugin', () => {
   `;
 
   it('should parse everything normally when readability is disabled', async () => {
-    const md = await mdast(noisyHtml).from('html').use(htmlReadabilityPlugin, {enable: false}).use(restoreReadabilityMetaPlugin).toMarkdown();
+    const md = await mdast(noisyHtml).from('html').use(htmlReadabilityPlugin, { readability: false }).use(restoreReadabilityMetaPlugin).toMarkdown();
 
     // Default parsing includes navigation and sidebar
     expect(md).toContain('Home');
