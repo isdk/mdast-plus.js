@@ -1,6 +1,7 @@
 import type { Plugin } from 'unified';
 import type { Root } from 'hast';
 import { fromHtml } from 'hast-util-from-html';
+import { fromDom } from 'hast-util-from-dom';
 import { PipelineStage } from '../types';
 
 export interface ReadabilityOptions {
@@ -35,7 +36,7 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
       throw new Error(`[html-readability] Dependency missing. Please install 'jsdom' and '@mozilla/readability'.`);
     }
 
-    const dom = new JSDOM(doc, {url, pretendToBeVisual: true, ...jsdomOptions});
+    const dom = new JSDOM(doc, { url, pretendToBeVisual: true, ...jsdomOptions, includeNodeLocations: true });
     const reader = new Readability(dom.window.document, {
       // debug: true,
       maxElemsToParse: 100000,
@@ -43,6 +44,7 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
       charThreshold: 500,
       keepClasses: true,
       ...readabilityOptions,
+      serializer: (el: any) => el,
     });
     const article = reader.parse();
 
@@ -50,15 +52,20 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
       return fromHtml(doc, { fragment: true, ...hastOptions });
     }
 
-    const hast = fromHtml(article.content, { fragment: true, ...hastOptions });
+    const domContent = article.content;
+
+    // const hast = fromHtml(article.content, { fragment: true, ...hastOptions });
+    let hast = fromDom(domContent, { afterTransform: hastOptions?.afterTransform }) as any;
+    // console.log('🚀 ~ file: html-readability.ts:59 ~ hast:', hast)
+    const isFragment = hastOptions?.fragment !== false; // default to true
+    // 无用，返回的 domContent 已经不是jsdom了， nodeLocation 没有这个方法！
+    // const location = dom.nodeLocation(dom.window.document.querySelector('html')); //dom.window.document.querySelector('div')
 
     const metadata = {
-      title: article.title,
-      byline: article.byline,
-      excerpt: article.excerpt,
-      siteName: article.siteName,
-      lang: article.lang
+      ...article,
     };
+    delete metadata.content;
+    delete metadata.textContent;
 
     if (file) {
       file.data = file.data || {};
@@ -66,6 +73,38 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     }
 
     if (hast) {
+      if (isFragment) {
+        hast = {
+          type: 'root',
+          children: [hast],
+        }
+      } else {
+        hast = {
+          type: 'root',
+          children: [
+            {
+              type: 'element',
+              tagName: 'html',
+              properties: {},
+              children: [
+                {
+                  type: 'element',
+                  tagName: 'head',
+                  properties: {},
+                  children: [],
+                },
+                {
+                  type: 'element',
+                  tagName: 'body',
+                  properties: {},
+                  children: [hast],
+                },
+              ],
+            },
+          ],
+        };
+      }
+
       hast.data = hast.data || {};
       (hast.data as any).readability = metadata;
     }

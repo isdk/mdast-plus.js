@@ -99,4 +99,26 @@ describe('HTML Readability Plugin', () => {
     expect(md).toContain('[relative link](https://my.com/abc/)');
     expect(md).not.toContain('Home');
   });
+
+  it('should respect fragment option', async () => {
+    // Default: fragment = true -> returns root
+    const astDefault: any = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugin)
+      .toAST({ stage: 'parse' });
+
+    // console.log('🚀 ~ file: readability.spec.ts:111 ~ astDefault:', JSON.stringify(astDefault, null, 2))
+    expect(astDefault.type).toBe('root');
+    expect(astDefault.children[0]).toMatchObject({tagName: 'div', type: 'element'});
+
+    // Explicit: fragment = false -> returns element (the extracted article div)
+    const astNoFragment: any = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugin, { hast: { fragment: false } })
+      .toAST({ stage: 'parse' });
+
+    // console.log('🚀 ~ file: readability.spec.ts:121 ~ astNoFragment:', JSON.stringify(astNoFragment, null, 2))
+    expect(astNoFragment.type).toBe('root');
+    expect(astNoFragment.children[0]).toMatchObject({tagName: 'html', type: 'element'});
+  });
 });
