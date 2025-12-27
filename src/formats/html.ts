@@ -25,13 +25,14 @@ const htmlInputPlugins: MdastPlugin[] = [
         ...inlineStylesFromHtmlHandlers,
       },
     }],
-    stage: PipelineStage.parse,
+    stage: PipelineStage.normalize,
+    order: -100,
   },
 ];
 
 /**
  * Plugin sequence for serializing a standard AST into sanitized HTML string.
- * Includes the remark-rehype bridge, HTML sanitization with extended schema, 
+ * Includes the remark-rehype bridge, HTML sanitization with extended schema,
  * and rehype-stringify.
  */
 const htmlOutputPlugins: MdastPlugin[] = [
@@ -64,7 +65,7 @@ const htmlOutputPlugins: MdastPlugin[] = [
 
 /**
  * HTML format definition.
- * 
+ *
  * Provides a bidirectional mapping between HTML strings and mdast-plus ASTs.
  * Includes built-in sanitization and support for table spans and image dimensions.
  */
