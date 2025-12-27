@@ -249,15 +249,15 @@ export class MdastBasePipeline {
    * @param options - Arguments for the plugin(s).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(stage: PipelineStageName, plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
+  public useAt(stage: PipelineStage | PipelineStageName, plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
   /**
    * Adds a plugin or an array of plugins to the pipeline. The stage is taken from the plugin object(s).
    * @param plugin - The MdastPlugin object or an array of them.
    * @param options - Arguments for the plugin(s) (overrides plugin.options if provided).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(plugin: MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
-  public useAt(stageOrPlugin: PipelineStageName | MdastPlugin | (Plugin | MdastPlugin)[], plugin?: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
+  public useAt(plugin: MdastPlugin | MdastPlugin[], ...options: any[]): this;
+  public useAt(stageOrPlugin: PipelineStage | PipelineStageName | MdastPlugin | MdastPlugin[], plugin?: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
     if (Array.isArray(stageOrPlugin)) {
       for (const p of stageOrPlugin) {
         this.useAt(p as any, plugin as any, ...options);
@@ -267,37 +267,37 @@ export class MdastBasePipeline {
 
     if (Array.isArray(plugin)) {
       for (const p of plugin) {
-        this.useAt(stageOrPlugin as PipelineStageName, p as any, ...options);
+        this.useAt(stageOrPlugin as any, p as any, ...options);
       }
       return this;
     }
 
     if (typeof stageOrPlugin === 'object' && stageOrPlugin !== null && 'plugin' in stageOrPlugin) {
       const entry = stageOrPlugin as MdastPlugin;
-      const stageName = (entry.stage !== undefined)
-        ? (typeof entry.stage === 'string' ? entry.stage : PipelineStage[entry.stage] as PipelineStageName)
-        : 'compile';
+      const stage = (entry.stage !== undefined)
+        ? (typeof entry.stage === 'string' ? PipelineStage[entry.stage] : entry.stage)
+        : DefaultPipelineStage;
 
       const pluginOptions = (plugin !== undefined) ? [plugin, ...options] : entry.options;
 
       this.queue.push(this.toRuntimeEntry({
         ...entry,
         options: pluginOptions,
-      }, PipelineStage[stageName]));
+      }, stage));
     } else {
-      const stage = stageOrPlugin as PipelineStageName;
+      const stage = typeof stageOrPlugin === 'string' ? PipelineStage[stageOrPlugin] ?? DefaultPipelineStage : stageOrPlugin as PipelineStage;
       if (typeof plugin === 'object' && plugin !== null && 'plugin' in plugin) {
         const entry = plugin as MdastPlugin;
         const pluginOptions = options.length > 0 ? options : entry.options;
         this.queue.push(this.toRuntimeEntry({
             ...entry,
             options: pluginOptions,
-          }, PipelineStage[stage]));
+          }, stage));
       } else if (plugin) {
         this.queue.push({
           plugin,
           options,
-          stage: PipelineStage[stage],
+          stage: stage,
           order: 0
         });
       }
@@ -433,9 +433,9 @@ export class MdastPipeline extends MdastBasePipeline {
    * @param options.stage - Run the pipeline up to this stage only.
    * @param options.overrides - Map for plugin option overrides.
    */
-  public async toAst(options?: { stage?: PipelineStageName, overrides?: Record<string, any> }) {
+  public async toAst(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any> }) {
     if (options?.stage) {
-      const targetStage = PipelineStage[options.stage];
+      const targetStage = typeof options.stage === 'string' ? PipelineStage[options.stage] : options.stage;
       // Run only up to the specified stage
       const runQueue = this.queue.filter(p => {
         const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
@@ -471,7 +471,7 @@ export class MdastPipeline extends MdastBasePipeline {
   /** Alias for toHtml() */
   public toHTML() { return this.toHtml(); }
   /** Alias for toAst() */
-  public toAST(options?: { stage?: PipelineStageName, overrides?: Record<string, any> }) { return this.toAst(options); }
+  public toAST(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any> }) { return this.toAst(options); }
 }
 
 MdastPipeline.register(markdownFormat);
