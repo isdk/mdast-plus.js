@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.2.1](https://github.com/isdk/mdast-plus.js/compare/v0.2.0...v0.2.1) (2025-12-27)
+
+
+### Features
+
+* **pipeline:** add configure method to modify plugin options ([d66c85c](https://github.com/isdk/mdast-plus.js/commit/d66c85c7428e65883331cead1c3c04a83c2c834d))
+* **pipeline:** useAt/use stage argument could be PipelineStage now ([2631e0a](https://github.com/isdk/mdast-plus.js/commit/2631e0aadeafedae624ac3560b29cb7c04b14696))
+
+
+### Bug Fixes
+
+* **pipeline:** should skip disabled main-plugin to replace ([e4428b3](https://github.com/isdk/mdast-plus.js/commit/e4428b3dc97a4921c206f312f1cdb3ca218fa305))
+
+
+### Refactor
+
+* **readability:** the readability option can be false to disable now; add url option ([d1d94e3](https://github.com/isdk/mdast-plus.js/commit/d1d94e3ae55deb97e3e44d952710163ebfe3d04e))
+
 ## [0.2.0](https://github.com/isdk/mdast-plus.js/compare/v0.1.3...v0.2.0) (2025-12-26)
 
 
