@@ -82,6 +82,8 @@ export const myPlugin: MdastPlugin = {
 };
 ```
 
+> **Important**: Never pass `false` as the second argument to `.use()` or within `MdastPlugin.options` if you want the plugin to execute. In `unified`, `false` is a special value that **disables** the plugin. If your plugin is a "main" plugin (like a parser replacement), disabling it with `false` will prevent it from replacing the default plugin of that stage, providing a safe fallback. A warning will be printed to the terminal when this fallback occurs. Use an options object (e.g., `{ enabled: false }`) if you need a way to skip logic within the plugin itself while keeping it active.
+
 ### Main Plugins
 
 Each stage supports a **single** main plugin. When a plugin is marked with `main: true`, it will replace the first plugin that was originally registered for that stage. This is primarily used by formats to allow users to override the default parser or stringifier by injecting a different one at the same stage.

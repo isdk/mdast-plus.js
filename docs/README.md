@@ -93,6 +93,8 @@ console.log(vfile.value); // The serialized HTML string
 
 `mdast-plus` uses [unified](https://github.com/unifiedjs/unified) internally. If you add the same plugin function multiple times, the last configuration **overrides** the previous ones.
 
+> **Warning**: Passing `false` as a plugin option (e.g., `.use(myPlugin, false)`) will **disable** the plugin entirely. For regular plugins, this means they simply won't run. For plugins marked as `main: true` (like replacements for the default parser), if they are disabled with `false`, they will **not** replace the default plugin of that stage, providing a safe fallback to the default behavior. If you want to bypass a plugin's logic while keeping it active (e.g. to maintain its parser), use an options object like `{ enable: false }` instead.
+
 ```typescript
 // The plugin will run ONCE with option: 2
 pipeline.use(myPlugin, { option: 1 });

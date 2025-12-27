@@ -8,11 +8,15 @@
 
 > `const` **htmlReadabilityPlugin**: `object`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:77](https://github.com/isdk/mdast-plus.js/blob/8870eec4ef97dd48bead818813d06479ceff9450/src/plugins/html-readability.ts#L77)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:79](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L79)
 
 Pre-configured MdastPlugin for html-readability.
 
 ## Type Declaration
+
+### main
+
+> **main**: `boolean` = `true`
 
 ### name
 
@@ -20,7 +24,7 @@ Pre-configured MdastPlugin for html-readability.
 
 ### plugin
 
-> **plugin**: `Plugin`\<\[(`boolean` \| [`ReadabilityOptions`](../interfaces/ReadabilityOptions.md))?\], `string`, `Root`\> = `htmlReadability`
+> **plugin**: `Plugin`\<\[[`ReadabilityOptions`](../interfaces/ReadabilityOptions.md)?\], `string`, `Root`\> = `htmlReadability`
 
 ### stage
 
