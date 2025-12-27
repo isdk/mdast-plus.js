@@ -320,6 +320,27 @@ export class MdastBasePipeline {
   }
 
   /**
+   * Modifies the options of a plugin that is already in the pipeline queue.
+   * Searches from the end of the queue and updates the first match found.
+   *
+   * @param pluginName - The name of the plugin to modify.
+   *                     Matches against explicit plugin name or function name.
+   * @param options - The new options to pass to the plugin (replaces existing options).
+   * @returns The pipeline instance for chaining.
+   */
+  public configure(pluginName: string, ...options: any[]): this {
+    for (let i = this.queue.length - 1; i >= 0; i--) {
+      const entry = this.queue[i];
+      const name = entry.name || entry.plugin.name;
+      if (name === pluginName) {
+        entry.options = options;
+        break;
+      }
+    }
+    return this;
+  }
+
+  /**
    * Assembles a unified processor based on the sorted plugin queue.
    * @protected
    */
