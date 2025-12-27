@@ -8,6 +8,7 @@ export interface ReadabilityOptions {
   url?: string;
   readability?: Record<string, any> | false;
   jsdom?: Record<string, any>;
+  hast?: Record<string, any>;
   'rehype-parse'?: Record<string, any>;
 }
 
@@ -15,11 +16,11 @@ export interface ReadabilityOptions {
  * A unified/rehype plugin that uses Mozilla's Readability to parse the input HTML.
  */
 export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = function (options) {
-  const { readability: readabilityOptions, jsdom: jsdomOptions, url } = options || {};
+  const { readability: readabilityOptions, jsdom: jsdomOptions, hast: hastOptions, url } = options || {};
 
   this.parser = function (doc: string, file: any) {
     if (readabilityOptions === false) {
-      return fromHtml(doc, { fragment: true });
+      return fromHtml(doc, { fragment: true, ...hastOptions });
     }
 
     let JSDOM: any;
@@ -46,10 +47,10 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     const article = reader.parse();
 
     if (!article || !article.content) {
-      return fromHtml(doc, { fragment: true });
+      return fromHtml(doc, { fragment: true, ...hastOptions });
     }
 
-    const hast = fromHtml(article.content, { fragment: true });
+    const hast = fromHtml(article.content, { fragment: true, ...hastOptions });
 
     const metadata = {
       title: article.title,

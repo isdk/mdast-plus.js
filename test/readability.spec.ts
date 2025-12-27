@@ -27,6 +27,7 @@ describe('HTML Readability Plugin', () => {
             <h1>Real Content Heading</h1>
             <p>This is the main paragraph of the article. It has enough text to be considered content by Readability.</p>
             <p>Another paragraph with some <b>bold</b> text and a <a href="https://example.com">link</a>.</p>
+            <p>Last paragraph with a <a href="/abc/">relative link</a>.</p>
           </article>
         </main>
         <footer>
@@ -90,11 +91,12 @@ describe('HTML Readability Plugin', () => {
   it('should support htmlReadabilityPlugins array', async () => {
     const md = await mdast(noisyHtml)
       .from('html')
-      .use(htmlReadabilityPlugins)
+      .use(htmlReadabilityPlugins, {url: 'https://my.com'})
       .toMarkdown();
 
     // Main content should remain
     expect(md).toContain('# Real Content Heading');
+    expect(md).toContain('[relative link](https://my.com/abc/)');
     expect(md).not.toContain('Home');
   });
 });
