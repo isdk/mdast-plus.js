@@ -89,6 +89,8 @@ console.log(vfile.value); // 序列化后的 HTML 字符串
 
 `mdast-plus` 内部使用 [unified](https://github.com/unifiedjs/unified)。如果您多次添加同一个插件函数，最后的配置将**覆盖**之前的配置。
 
+> **警告**: 将 `false` 作为插件选项传递（例如 `.use(myPlugin, false)`）将**完全禁用**该插件。对于普通插件，这意味着它们将不会运行。对于标记为 `main: true` 的插件（如默认解析器的替代者），如果它们被 `false` 禁用，它们将**不会**替换该阶段的默认插件，从而安全地回退到默认行为。如果你需要跳过插件逻辑但保持其激活状态（例如为了保留其解析器），请改用选项对象，例如 `{ enable: false }`。
+
 ```typescript
 // 插件将只执行一次，且选项为: 2
 pipeline.use(myPlugin, { option: 1 });
