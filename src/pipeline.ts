@@ -341,8 +341,14 @@ export class MdastBasePipeline {
 
       if (mainIndex !== -1) {
         const mainPlugin = plugins[mainIndex];
-        plugins.splice(mainIndex, 1);
-        plugins[0] = mainPlugin;
+        const isDisabled = mainPlugin.options?.[0] === false;
+
+        if (!isDisabled) {
+          plugins.splice(mainIndex, 1);
+          plugins[0] = mainPlugin;
+        } else {
+          console.warn(`Main Plugin "${mainPlugin.name}" is disabled. Skipping.`);
+        }
       }
 
       // Semantic re-ordering (before/after)
