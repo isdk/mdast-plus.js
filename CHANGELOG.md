@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.2.2](https://github.com/isdk/mdast-plus.js/compare/v0.2.1...v0.2.2) (2025-12-28)
+
+
+### Features
+
+* **readability:** add hast option ([59a2da4](https://github.com/isdk/mdast-plus.js/commit/59a2da463b345402fa1e5b007074897d6f758615))
+
+
+### Bug Fixes
+
+* **html:** replace rehype-remark from paser to normalize first for toAST({ stage: 'parse' }) can return original AST ([b3e7902](https://github.com/isdk/mdast-plus.js/commit/b3e7902381db7e0bc5276d9be0b6fb6d5c9ef398))
+* **test:** remove unused vars ([0a981a8](https://github.com/isdk/mdast-plus.js/commit/0a981a86addc11b0b0d9cb0b94dd8892f5647106))
+
+
+### Refactor
+
+* move staged execution logic to 'to()' method ([aa214c1](https://github.com/isdk/mdast-plus.js/commit/aa214c1e346d12560f7f126de43bf10ae01da747))
+* use fromDom to speedup ([8cdc71a](https://github.com/isdk/mdast-plus.js/commit/8cdc71a598258c13a6fdd4dc7b8993d46ad746cd))
+
 ## [0.2.1](https://github.com/isdk/mdast-plus.js/compare/v0.2.0...v0.2.1) (2025-12-27)
 
 
