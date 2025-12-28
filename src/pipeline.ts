@@ -3,7 +3,7 @@ import { VFile, type VFileCompatible } from 'vfile';
 
 import type { Root } from 'mdast';
 
-import { DefaultPipelineStage, type MdastFormat, type MdastPlugin, PipelineStage, PipelineStageName } from './types';
+import { DefaultPipelineStage, type MdastFormat, type MdastPlugin, PipelineStage, PipelineStageName, type PipelineRunOptions } from './types';
 
 // Default Formats
 import { markdownFormat } from './formats/markdown';
@@ -190,30 +190,109 @@ export class MdastBasePipeline {
   }
 
   /**
+   * Resolves the final plugin queue for execution based on the target format and run options.
+   * Calculates the effective plugin list by applying overrides, handling partial execution (stage/stopAtIndex),
+   * and injecting necessary input/output plugins.
+   * @protected
+   */
+  protected resolveRunQueue(
+    format: MdastFormat,
+    overrides?: Record<string, any>,
+    stage?: PipelineStage,
+    stopAtIndex?: number
+  ): MdastPlugin[] {
+    // 1. Fork Queue & Apply Overrides
+    let runQueue: MdastPlugin[] = [];
+    if (overrides) {
+        runQueue = this.queue.map(p => this.toRuntimeEntry(p, (p.stage as PipelineStage) ?? DefaultPipelineStage, overrides));
+    } else {
+        runQueue = [...this.queue];
+    }
+
+    // 2. Assemble Queue based on mode (Partial/Stage vs Full)
+    if (stage !== undefined) {
+      const targetStage = stage;
+      // Partial Run: Run only up to the specified stage
+      
+      // Filter by stage
+      runQueue = runQueue.filter(p => {
+        const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
+        return s <= targetStage;
+      });
+
+      const fromIndex = runQueue.findIndex(p => (p.stage ?? DefaultPipelineStage) === targetStage);
+      
+      // Default to 0 (first plugin) if stopAtIndex is not provided
+      const relativeIndex = stopAtIndex ?? 0; 
+      
+      // Calculate the absolute index in the queue to stop at
+      const toIndex = fromIndex !== -1 ? fromIndex + relativeIndex : runQueue.length - 1;
+
+      // Slice the queue up to the calculated index
+      const slicedQueue = runQueue.slice(0, toIndex + 1);
+
+      // Identify Main plugins that were excluded by the slice but need to be preserved
+      // (Only add them if they aren't already in the sliced queue)
+      const reservedMainPlugins = runQueue.filter(p => p.main && !slicedQueue.includes(p));
+      
+      runQueue = slicedQueue.concat(reservedMainPlugins);
+
+      // Ensure Input Plugins are present in the SLICED queue
+      this.ensureInputPlugins(runQueue, overrides, targetStage);
+
+      // Inject pass-through compiler to return AST
+      runQueue.push({
+        plugin: astCompiler,
+        options: [],
+        stage: PipelineStage.stringify,
+        order: 0
+      });
+    } else {
+      // Full Run: Process entire pipeline and output format
+      
+      // Check implicit input format BEFORE adding output plugins
+      this.ensureInputPlugins(runQueue, overrides, PipelineStage.stringify);
+
+      // Append Output Plugins
+      // Output plugins default to the Finalize (300) stage.
+      if (format.output) {
+        for (const p of format.output) {
+          runQueue.push(this.toRuntimeEntry(p, PipelineStage.finalize, overrides));
+        }
+      }
+    }
+    
+    return runQueue;
+  }
+
+  /**
    * Processes the pipeline and serializes the result into the specified format.
    * @param fmt - Target format ID or definition.
-   * @param overrides - Optional map to override plugin options.
+   * @param optionsOrOverrides - Pipeline execution options or plugin option overrides.
    * @returns A promise resolving to a VFile containing the result.
    */
-  public async to(fmt: string | MdastFormat, overrides?: Record<string, any>): Promise<VFile> {
+  public async to(fmt: string | MdastFormat, optionsOrOverrides?: PipelineRunOptions | Record<string, any>): Promise<VFile> {
     const format = this.resolveFormat(fmt);
     if (!format.output) {
       throw new Error(`[MdastPlus] Format '${format.id}' does not support output.`);
     }
 
-    // 1. Fork Queue
-    const runQueue = [...this.queue];
+    let overrides: Record<string, any> | undefined;
+    let stage: PipelineStage | undefined;
+    let stopAtIndex: number | undefined;
 
-    // Check implicit input format BEFORE adding output plugins
-    this.ensureInputPlugins(runQueue, overrides);
-
-    // 2. Append Output Plugins
-    // Output plugins default to the Finalize (300) stage.
-    for (const p of format.output) {
-      runQueue.push(this.toRuntimeEntry(p, PipelineStage.finalize, overrides));
+    if (optionsOrOverrides) {
+        const opts = optionsOrOverrides as any;
+        if ('overrides' in opts || 'stage' in opts || 'stopAtIndex' in opts) {
+            overrides = opts.overrides;
+            stage = (typeof opts.stage === 'string') ? PipelineStage[opts.stage] : opts.stage;
+            stopAtIndex = opts.stopAtIndex;
+        } else {
+            overrides = optionsOrOverrides as Record<string, any>;
+        }
     }
 
-    // 3. Assemble & Run
+    const runQueue = this.resolveRunQueue(format, overrides, stage, stopAtIndex);
     const processor = this.assembleProcessor(runQueue);
 
     if (isNode(this.input)) {
@@ -463,56 +542,9 @@ export class MdastPipeline extends MdastBasePipeline {
    * @param options.overrides - Map for plugin option overrides.
    * @param options.stopAtIndex - Index of the stage plugin to stop at (0-based). Defaults to 0 (the first plugin in the stage).
    */
-  public async toAst(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any>, stopAtIndex?: number }) {
-    if (options?.stage !== undefined) {
-      const targetStage = typeof options.stage === 'string' ? PipelineStage[options.stage] : options.stage;
-      // Run only up to the specified stage
-      let runQueue = this.queue.filter(p => {
-        const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
-        return s <= targetStage;
-      });
-
-      const fromIndex = runQueue.findIndex(p => p.stage === targetStage);
-      
-      // Default to 0 (first plugin) if stopAtIndex is not provided
-      const relativeIndex = options.stopAtIndex ?? 0; 
-      
-      // Calculate the absolute index in the queue to stop at
-      const toIndex = fromIndex !== -1 ? fromIndex + relativeIndex : runQueue.length - 1;
-
-      // Slice the queue up to the calculated index
-      const slicedQueue = runQueue.slice(0, toIndex + 1);
-
-      // Identify Main plugins that were excluded by the slice but need to be preserved
-      // (Only add them if they aren't already in the sliced queue)
-      const reservedMainPlugins = runQueue.filter(p => p.main && !slicedQueue.includes(p));
-      
-      runQueue = slicedQueue.concat(reservedMainPlugins);
-
-      // Add the pass-through compiler to return the AST
-      runQueue.push({
-        plugin: astCompiler,
-        options: [],
-        stage: PipelineStage.stringify,
-        order: 0
-      });
-
-      this.ensureInputPlugins(runQueue, options.overrides, targetStage);
-
-      const processor = this.assembleProcessor(runQueue);
-
-      if (isNode(this.input)) {
-          const tree = await processor.run(this.input as any);
-          return tree as Root;
-      } else {
-          const vfile = await processor.process(this.input);
-          return vfile.result as Root;
-      }
-
-    } else {
-      const vfile = await this.to('ast', options?.overrides);
-      return vfile.result as Root;
-    }
+  public async toAst(options?: PipelineRunOptions) {
+    const vfile = await this.to('ast', options);
+    return vfile.result as Root;
   }
 
   /** Alias for toHtml() */

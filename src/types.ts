@@ -81,6 +81,27 @@ export interface MdastFormat {
 }
 
 /**
+ * Options for controlling the pipeline execution.
+ */
+export interface PipelineRunOptions {
+  /**
+   * Run the pipeline only up to the specified stage.
+   * Useful for debugging or inspecting intermediate ASTs.
+   */
+  stage?: PipelineStage | PipelineStageName;
+  /**
+   * If `stage` is specified, stop execution at this index (0-based)
+   * within the list of plugins at that stage.
+   * Defaults to 0 (the first plugin).
+   */
+  stopAtIndex?: number;
+  /**
+   * Map of plugin names to their option overrides.
+   */
+  overrides?: Record<string, any>;
+}
+
+/**
  * Metadata capturing the origin of a node during conversion.
  */
 export interface MdastDataOrigin {
