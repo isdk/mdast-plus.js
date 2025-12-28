@@ -6,7 +6,7 @@
 
 # Interface: ReadabilityOptions
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L7)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L7)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://gith
 
 > `optional` **hast**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:12](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L12)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:12](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L12)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:12](https://git
 
 > `optional` **jsdom**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L11)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L11)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://git
 
 > `optional` **readability**: `false` \| `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L10)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L10)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://git
 
 > `optional` **rehype-parse**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L13)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L13)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://git
 
 > `optional` **url**: `string`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L9)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/b08b74cf958d7f9ed7bee309acc7e659bc74da3c/src/plugins/html-readability.ts#L9)

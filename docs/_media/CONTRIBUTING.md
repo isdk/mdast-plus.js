@@ -110,6 +110,41 @@ export const myPlugin: MdastPlugin = {
 
 > **Important**: Never pass `false` as the second argument to `.use()` or within `MdastPlugin.options` if you want the plugin to execute. In `unified`, `false` is a special value that **disables** the plugin. If your plugin is a "main" plugin (like a parser replacement), disabling it with `false` will prevent it from replacing the default plugin of that stage, providing a safe fallback. A warning will be printed to the terminal when this fallback occurs. Use an options object (e.g., `{ enabled: false }`) if you need a way to skip logic within the plugin itself while keeping it active.
 
+### Plugin Development Notes
+
+#### 1. `.use()` Flexibility and Array Ambiguity
+
+`MdastPipeline` is designed to support both standard `unified` community habits and `mdast-plus`'s high-level structured objects.
+
+*   **Standard call**: `.use(plugin, options)`
+*   **Tuple call**: `.use([plugin, options])` —— commonly used in Presets.
+*   **List call**: `.use([plugin1, plugin2])` —— registers multiple plugins at once.
+*   **Struct call**: `.use({ plugin: myPlugin, stage: 'parse' })` —— recommended for internal development.
+
+**Note:** When an array is passed, the system uses a **Heuristic** algorithm to distinguish between Tuple and List:
+*   If the array looks like `[Function, Object]`, it could be either `[Plugin, Options]` (Tuple) or `[Plugin, MdastPlugin]` (List).
+*   The system checks subsequent elements. If subsequent elements **don't look like** a plugin (not a function, not an array, no `plugin` property), the system determines it's a **Tuple** (i.e., subsequent elements are options).
+*   Therefore, ensure your structure is clear when developing Presets.
+
+#### 2. Option Passing and Presets
+
+When you load an array of multiple plugins (Preset) using `.use(preset, globalOptions)`, `globalOptions` will be recursively passed to each sub-plugin in the Preset (unless the sub-plugin already has specific Options bound). This allows users to configure a set of plugins with a single call.
+
+#### 3. Plugin Signature
+
+Modern `unified` (v11+) plugins (Attachers) only receive `options` as an argument. The context is accessed via `this`.
+
+```typescript
+// ✅ Correct
+const myPlugin = function(options) {
+  const processor = this; // Access processor context
+  return (tree, file) => { ... }; // Transformer receives tree and file
+}
+
+// ❌ Incorrect (Old style)
+const myPlugin = function(options, context) { ... }
+```
+
 ### Main Plugins
 
 Each stage supports a **single** main plugin. When a plugin is marked with `main: true`, it will replace the first plugin that was originally registered for that stage. This is primarily used by formats to allow users to override the default parser or stringifier by injecting a different one at the same stage.
