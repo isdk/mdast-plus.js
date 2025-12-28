@@ -68,6 +68,31 @@ const ast = await mdast('==高亮内容==').toAST();
 const rawAst = await mdast('==高亮内容==').toAST({ stage: 'parse' });
 ```
 
+### 部分执行与调试 (Partial Execution & Debugging)
+
+您可以在任何阶段停止管道以检查中间 AST，即使目标是特定的输出格式（如 `html` 或 `markdown`）。这对于调试非常有帮助。
+
+```typescript
+// 运行 'markdown' 管道但在 'parse' 阶段后停止
+// 返回包含该时刻 AST 的 VFile
+const vfile = await mdast(input).to('markdown', { stage: 'parse' });
+const ast = vfile.result; 
+```
+
+### 运行时覆盖 (Runtime Overrides)
+
+您可以在执行时通过 `.to()` 的 `overrides` 选项覆盖插件选项。这对于在不重建管道的情况下动态调整行为非常有用。
+
+```typescript
+await mdast(input)
+  .use({ name: 'myPlugin', plugin: myPlugin, options: [{ foo: 'bar' }] }) // 默认选项
+  .to('html', {
+    overrides: {
+      myPlugin: { foo: 'baz' } // 仅针对本次运行的覆盖
+    }
+  });
+```
+
 ### 高级工作流
 
 ```typescript
