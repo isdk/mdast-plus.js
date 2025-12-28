@@ -21,6 +21,7 @@
 - [MdastPlugin](interfaces/MdastPlugin.md)
 - [MdastSub](interfaces/MdastSub.md)
 - [MdastSup](interfaces/MdastSup.md)
+- [PipelineRunOptions](interfaces/PipelineRunOptions.md)
 - [ReadabilityOptions](interfaces/ReadabilityOptions.md)
 
 ## Type Aliases

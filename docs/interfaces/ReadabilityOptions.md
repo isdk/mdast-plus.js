@@ -6,15 +6,23 @@
 
 # Interface: ReadabilityOptions
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:6](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L6)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:7](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L7)
 
 ## Properties
+
+### hast?
+
+> `optional` **hast**: `Record`\<`string`, `any`\>
+
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:12](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L12)
+
+***
 
 ### jsdom?
 
 > `optional` **jsdom**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L10)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L11)
 
 ***
 
@@ -22,7 +30,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://git
 
 > `optional` **readability**: `false` \| `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L9)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L10)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://gith
 
 > `optional` **rehype-parse**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L11)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L13)
 
 ***
 
@@ -38,4 +46,4 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:11](https://git
 
 > `optional` **url**: `string`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:8](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/plugins/html-readability.ts#L8)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:9](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/plugins/html-readability.ts#L9)

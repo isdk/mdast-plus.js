@@ -6,7 +6,7 @@
 
 # Interface: MdastDataOrigin
 
-Defined in: [packages/mdast-plus/src/types.ts:86](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/types.ts#L86)
+Defined in: [packages/mdast-plus/src/types.ts:107](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/types.ts#L107)
 
 Metadata capturing the origin of a node during conversion.
 
@@ -20,7 +20,7 @@ Metadata capturing the origin of a node during conversion.
 
 > **format**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:88](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/types.ts#L88)
+Defined in: [packages/mdast-plus/src/types.ts:109](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/types.ts#L109)
 
 The original source format.
 
@@ -30,7 +30,7 @@ The original source format.
 
 > `optional` **hash**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:92](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/types.ts#L92)
+Defined in: [packages/mdast-plus/src/types.ts:113](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/types.ts#L113)
 
 Hash used for caching or change detection.
 
@@ -40,6 +40,6 @@ Hash used for caching or change detection.
 
 > `optional` **raw**: `unknown`
 
-Defined in: [packages/mdast-plus/src/types.ts:90](https://github.com/isdk/mdast-plus.js/blob/becb4bdeb4b577bd75c7751367751e84056ff87e/src/types.ts#L90)
+Defined in: [packages/mdast-plus/src/types.ts:111](https://github.com/isdk/mdast-plus.js/blob/f87faaaa5512a2a313584cbae97a686bf2807b44/src/types.ts#L111)
 
 The raw content from the source before conversion.

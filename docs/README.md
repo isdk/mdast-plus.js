@@ -72,6 +72,31 @@ const ast = await mdast('==Highlighted==').toAST();
 const rawAst = await mdast('==Highlighted==').toAST({ stage: 'parse' });
 ```
 
+### Partial Execution & Debugging
+
+You can stop the pipeline at any stage to inspect the intermediate AST, even when targeting a specific output format like `html` or `markdown`.
+
+```typescript
+// Run 'markdown' pipeline but stop after 'parse' stage
+// Returns the VFile with the AST at that point
+const vfile = await mdast(input).to('markdown', { stage: 'parse' });
+const ast = vfile.result; 
+```
+
+### Runtime Overrides
+
+You can override plugin options at the moment of execution using the `overrides` option in `.to()`. This is useful for adjusting behavior dynamically without rebuilding the pipeline.
+
+```typescript
+await mdast(input)
+  .use({ name: 'myPlugin', plugin: myPlugin, options: [{ foo: 'bar' }] }) // Default option
+  .to('html', {
+    overrides: {
+      myPlugin: { foo: 'baz' } // Override for this run only
+    }
+  });
+```
+
 ### Advanced Pipeline
 
 ```typescript
