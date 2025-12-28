@@ -25,8 +25,7 @@ const htmlInputPlugins: MdastPlugin[] = [
         ...inlineStylesFromHtmlHandlers,
       },
     }],
-    stage: PipelineStage.normalize,
-    order: -100,
+    stage: PipelineStage.parse,
   },
 ];
 

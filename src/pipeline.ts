@@ -365,8 +365,10 @@ export class MdastBasePipeline {
         const isDisabled = mainPlugin.options?.[0] === false;
 
         if (!isDisabled) {
-          plugins.splice(mainIndex, 1);
-          plugins[0] = mainPlugin;
+          if (mainIndex !== 0) {
+            plugins.splice(mainIndex, 1);
+            plugins[0] = mainPlugin;
+          }
         } else {
           console.warn(`Main Plugin "${mainPlugin.name}" is disabled. Skipping.`);
         }
@@ -459,15 +461,33 @@ export class MdastPipeline extends MdastBasePipeline {
    * @param options - Configuration for the extraction.
    * @param options.stage - Run the pipeline up to this stage only.
    * @param options.overrides - Map for plugin option overrides.
+   * @param options.stopAtIndex - Index of the stage plugin to stop at (0-based). Defaults to 0 (the first plugin in the stage).
    */
-  public async toAst(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any> }) {
-    if (options?.stage) {
+  public async toAst(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any>, stopAtIndex?: number }) {
+    if (options?.stage !== undefined) {
       const targetStage = typeof options.stage === 'string' ? PipelineStage[options.stage] : options.stage;
       // Run only up to the specified stage
-      const runQueue = this.queue.filter(p => {
+      let runQueue = this.queue.filter(p => {
         const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
         return s <= targetStage;
       });
+
+      const fromIndex = runQueue.findIndex(p => p.stage === targetStage);
+      
+      // Default to 0 (first plugin) if stopAtIndex is not provided
+      const relativeIndex = options.stopAtIndex ?? 0; 
+      
+      // Calculate the absolute index in the queue to stop at
+      const toIndex = fromIndex !== -1 ? fromIndex + relativeIndex : runQueue.length - 1;
+
+      // Slice the queue up to the calculated index
+      const slicedQueue = runQueue.slice(0, toIndex + 1);
+
+      // Identify Main plugins that were excluded by the slice but need to be preserved
+      // (Only add them if they aren't already in the sliced queue)
+      const reservedMainPlugins = runQueue.filter(p => p.main && !slicedQueue.includes(p));
+      
+      runQueue = slicedQueue.concat(reservedMainPlugins);
 
       // Add the pass-through compiler to return the AST
       runQueue.push({
@@ -498,7 +518,7 @@ export class MdastPipeline extends MdastBasePipeline {
   /** Alias for toHtml() */
   public toHTML() { return this.toHtml(); }
   /** Alias for toAst() */
-  public toAST(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any> }) { return this.toAst(options); }
+  public toAST(options?: { stage?: PipelineStage | PipelineStageName, overrides?: Record<string, any>, stopAtIndex?: number }) { return this.toAst(options); }
 }
 
 MdastPipeline.register(markdownFormat);
