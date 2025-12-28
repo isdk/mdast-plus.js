@@ -17,6 +17,32 @@ Thank you for your interest in contributing to `@isdk/mdast-plus`! This document
     * `stringify`: Serializing AST to output.
 3. **Universal Data Protocols**: Nodes use `node.data` for metadata, and `node.data.hProperties` for HTML attributes.
 
+### Understanding the Pipeline
+
+The `MdastPipeline` class orchestrates the transformation process. Understanding its lifecycle is crucial for complex customizations.
+
+#### 1. Registration (`use`)
+
+When you call `.use()`, plugins are not executed immediately. Instead, they are wrapped as `MdastPlugin` entries and pushed into a `queue`.
+
+#### 2. Resolution (`resolveRunQueue`)
+
+When `.to(format)` is called, the pipeline resolves the final list of plugins to execute:
+
+- **Overrides**: Applies runtime options provided in `.to()`.
+- **Filtering**: If a specific `stage` or `stopAtIndex` is requested, the queue is sliced accordingly.
+- **Main Plugin Preservation**: Ensures "main" plugins (like parsers) are kept even if sliced out, unless explicitly disabled.
+- **Input/Output Injection**: Automatically adds input plugins (if missing) and format-specific output plugins.
+
+#### 3. Assembly (`assembleProcessor`)
+
+The resolved queue is then assembled into a `unified` processor:
+
+- **Grouping**: Plugins are grouped by `PipelineStage`.
+- **Replacement**: If a stage has a `main: true` plugin, it replaces the default plugin for that stage.
+- **Sorting**: Plugins within a stage are sorted by `order` and semantic `before`/`after` constraints.
+- **Execution**: The `unified` processor runs the plugins in sequence.
+
 ## Getting Started
 
 ### Prerequisites

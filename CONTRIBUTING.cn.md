@@ -17,6 +17,32 @@
     * `stringify`: 将 AST 序列化为输出。
 3. **通用数据协议**: 节点使用 `node.data` 存储元数据，使用 `node.data.hProperties` 存储 HTML 属性。
 
+### 理解 Pipeline 工作流 (Understanding the Pipeline)
+
+`MdastPipeline` 类负责协调整个转换过程。理解其生命周期对于进行复杂的定制至关重要。
+
+#### 1. 注册 (Registration - `use`)
+
+当您调用 `.use()` 时，插件不会立即执行。相反，它们被封装为 `MdastPlugin` 条目并推入一个队列 (`queue`) 中。
+
+#### 2. 解析 (Resolution - `resolveRunQueue`)
+
+当调用 `.to(format)` 时，Pipeline 会解析出最终要执行的插件列表：
+
+- **覆盖 (Overrides)**: 应用 `.to()` 中提供的运行时选项。
+- **过滤 (Filtering)**: 如果请求了特定的 `stage` 或 `stopAtIndex`，队列将被相应地切片。
+- **主插件保留 (Main Plugin Preservation)**: 确保即使被切片排除，“主”插件（如解析器）也会被保留（除非显式禁用）。
+- **输入/输出注入**: 自动添加输入插件（如果缺失）和特定格式的输出插件。
+
+#### 3. 组装 (Assembly - `assembleProcessor`)
+
+解析后的队列随后被组装成一个 `unified` 处理器：
+
+- **分组**: 插件按 `PipelineStage` 分组。
+- **替换**: 如果某个阶段存在 `main: true` 的插件，它将替换该阶段的默认插件。
+- **排序**: 阶段内的插件根据 `order` 和语义化的 `before`/`after` 约束进行排序。
+- **执行**: `unified` 处理器按顺序运行插件。
+
 ## 开始开发
 
 ### 前置条件
