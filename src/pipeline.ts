@@ -1,4 +1,4 @@
-import { type Plugin, unified, type Processor } from 'unified';
+import { type Plugin, unified, type Processor, type Pluggable, type PluggableList, type Preset } from 'unified';
 import { VFile, type VFileCompatible } from 'vfile';
 
 import type { Root } from 'mdast';
@@ -17,6 +17,22 @@ import { astFormat, astCompiler } from './formats/ast';
  */
 function isNode(input: any): boolean {
   return typeof input === 'object' && input !== null && typeof input.type === 'string';
+}
+
+/**
+ * Checks if the given input is likely a Pluggable (Plugin, MdastPlugin, Preset, or list/tuple of them).
+ * Used to distinguish between a List of Plugins and a Tuple [Plugin, ...Options].
+ * @param input - The item to check.
+ * @returns True if it appears to be a pluggable entity.
+ */
+function isPluggable(input: any): boolean {
+  if (typeof input === 'function') return true; // Plugin function
+  if (Array.isArray(input)) return true; // List or Tuple (which are PluggableList or Pluggable)
+  if (typeof input === 'object' && input !== null) {
+    if ('plugin' in input && typeof (input as any).plugin === 'function') return true; // MdastPlugin
+    if ('plugins' in input) return true; // Preset
+  }
+  return false;
 }
 
 /**
@@ -317,8 +333,79 @@ export class MdastBasePipeline {
    * @param options - Arguments for the plugin(s).
    * @returns The pipeline instance for chaining.
    */
-  public use(plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
+  public use(plugin: Pluggable | MdastPlugin | (Pluggable | MdastPlugin)[] | PluggableList, ...options: any[]): this {
     return this.useAt('compile', plugin, ...options);
+  }
+
+  /**
+   * Normalizes various plugin input formats (Pluggable, MdastPlugin, Lists) into a flat array of MdastPlugins.
+   * @param input - The plugin(s) input.
+   * @param options - Global options to apply (if applicable).
+   * @returns An array of MdastPlugins.
+   */
+  private normalizePluggable(
+    input: Pluggable | MdastPlugin | (Pluggable | MdastPlugin)[] | PluggableList,
+    options: any[] = []
+  ): MdastPlugin[] {
+    const plugins: MdastPlugin[] = [];
+
+    if (Array.isArray(input)) {
+      // Check for Tuple [Plugin, ...opts] vs List
+      // Unified treats array with first element as function as a Tuple (Plugin with options).
+      // MdastPlus also supports MdastPlugin arrays (Lists).
+      // Heuristic:
+      // If the first element is a function (Plugin), we need to distinguish between:
+      // 1. Tuple: [Plugin, Options]
+      // 2. List: [Plugin, Plugin, ...]
+      
+      let isTuple = false;
+      if (input.length > 0 && typeof input[0] === 'function') {
+        // If any subsequent element is NOT a pluggable, it must be a Tuple (Plugin + Options).
+        // (Because a List can only contain Pluggables).
+        // If all subsequent elements ARE Pluggables, we assume it's a List of plugins.
+        const tail = input.slice(1);
+        const hasNonPluggable = tail.some(item => !isPluggable(item));
+        if (hasNonPluggable) {
+            isTuple = true;
+        }
+      }
+
+      if (isTuple) {
+        // Treat as Tuple: [Plugin, ...options]
+        const [plugin, ...opts] = input as any[];
+        plugins.push({
+          plugin: plugin as Plugin,
+          options: opts,
+        });
+      } else {
+        // Treat as List of items (Pluggable or MdastPlugin)
+        for (const p of input) {
+          plugins.push(...this.normalizePluggable(p as any, options));
+        }
+      }
+    } else if (typeof input === 'function') {
+      // Plugin Function
+      plugins.push({
+        plugin: input,
+        options,
+      });
+    } else if (typeof input === 'object' && input !== null) {
+      if ('plugin' in input && typeof (input as any).plugin === 'function') {
+        // MdastPlugin
+        const mp = input as MdastPlugin;
+        // Use provided options if present, otherwise use MdastPlugin's internal options
+        const finalOptions = options.length > 0 ? options : (mp.options || []);
+        plugins.push({ ...mp, options: finalOptions });
+      } else if ('plugins' in input) {
+        // Preset
+        const preset = input as Preset;
+        if (preset.plugins) {
+          plugins.push(...this.normalizePluggable(preset.plugins));
+        }
+      }
+    }
+
+    return plugins;
   }
 
   /**
@@ -328,59 +415,40 @@ export class MdastBasePipeline {
    * @param options - Arguments for the plugin(s).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(stage: PipelineStage | PipelineStageName, plugin: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this;
+  public useAt(stage: PipelineStage | PipelineStageName, plugin: Pluggable | MdastPlugin | PluggableList | (Pluggable | MdastPlugin)[], ...options: any[]): this;
   /**
-   * Adds a plugin or an array of plugins to the pipeline. The stage is taken from the plugin object(s).
-   * @param plugin - The MdastPlugin object or an array of them.
+   * Adds a plugin or an array of plugins to the pipeline. The stage is taken from the plugin object(s) or defaults to 'compile'.
+   * @param plugin - The MdastPlugin object or an array of them, or a standard unified Pluggable.
    * @param options - Arguments for the plugin(s) (overrides plugin.options if provided).
    * @returns The pipeline instance for chaining.
    */
-  public useAt(plugin: MdastPlugin | MdastPlugin[], ...options: any[]): this;
-  public useAt(stageOrPlugin: PipelineStage | PipelineStageName | MdastPlugin | MdastPlugin[], plugin?: Plugin | MdastPlugin | (Plugin | MdastPlugin)[], ...options: any[]): this {
-    if (Array.isArray(stageOrPlugin)) {
-      for (const p of stageOrPlugin) {
-        this.useAt(p as any, plugin as any, ...options);
-      }
-      return this;
-    }
+  public useAt(plugin: MdastPlugin | MdastPlugin[] | Pluggable | PluggableList, ...options: any[]): this;
+  public useAt(arg0: any, arg1?: any, ...rest: any[]): this {
+    let targetStage: PipelineStage | undefined;
+    let input: any;
+    let opts: any[];
 
-    if (Array.isArray(plugin)) {
-      for (const p of plugin) {
-        this.useAt(stageOrPlugin as any, p as any, ...options);
-      }
-      return this;
-    }
-
-    if (typeof stageOrPlugin === 'object' && stageOrPlugin !== null && 'plugin' in stageOrPlugin) {
-      const entry = stageOrPlugin as MdastPlugin;
-      const stage = (entry.stage !== undefined)
-        ? (typeof entry.stage === 'string' ? PipelineStage[entry.stage] : entry.stage)
-        : DefaultPipelineStage;
-
-      const pluginOptions = (plugin !== undefined) ? [plugin, ...options] : entry.options;
-
-      this.queue.push(this.toRuntimeEntry({
-        ...entry,
-        options: pluginOptions,
-      }, stage));
+    if (typeof arg0 === 'string' || typeof arg0 === 'number') {
+      // Signature 1: useAt(stage, plugin, ...options)
+      targetStage = (typeof arg0 === 'string' ? PipelineStage[arg0 as PipelineStageName] : arg0) ?? DefaultPipelineStage;
+      input = arg1;
+      opts = rest;
     } else {
-      const stage = typeof stageOrPlugin === 'string' ? PipelineStage[stageOrPlugin] ?? DefaultPipelineStage : stageOrPlugin as PipelineStage;
-      if (typeof plugin === 'object' && plugin !== null && 'plugin' in plugin) {
-        const entry = plugin as MdastPlugin;
-        const pluginOptions = options.length > 0 ? options : entry.options;
-        this.queue.push(this.toRuntimeEntry({
-            ...entry,
-            options: pluginOptions,
-          }, stage));
-      } else if (plugin) {
-        this.queue.push({
-          plugin,
-          options,
-          stage: stage,
-          order: 0
-        });
-      }
+      // Signature 2: useAt(plugin, ...options)
+      targetStage = undefined; 
+      input = arg0;
+      opts = [arg1, ...rest].filter(x => x !== undefined);
     }
+
+    const normalized = this.normalizePluggable(input, opts);
+
+    for (const entry of normalized) {
+      // If we have a targetStage from arg0, use it as default.
+      const defaultStage = targetStage ?? DefaultPipelineStage;
+      
+      this.queue.push(this.toRuntimeEntry(entry, defaultStage));
+    }
+
     return this;
   }
 

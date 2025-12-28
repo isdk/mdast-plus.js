@@ -110,6 +110,41 @@ export const myPlugin: MdastPlugin = {
 
 > **重要提示**: 如果你希望插件执行，切勿将 `false` 作为 `.use()` 的第二个参数或在 `MdastPlugin.options` 中传递。在 `unified` 中，`false` 是一个特殊值，会**禁用**该插件。如果你的插件是“主”插件（如解析器替代者），用 `false` 禁用它将阻止它替换该阶段的默认插件，从而提供安全的回退（此时终端将显示警告信息）。如果你需要根据条件跳过插件内部的逻辑但保持其激活，请使用选项对象（例如 `{ enabled: false }`）。
 
+### 插件开发注意事项 (Plugin Development Notes)
+
+#### 1. `.use()` 的灵活性与数组歧义性 (Flexibility & Array Ambiguity)
+
+`MdastPipeline` 旨在同时支持 `unified` 社区习惯和 `mdast-plus` 的高级结构化对象。
+
+*   **标准调用**: `.use(plugin, options)`
+*   **Tuple 调用**: `.use([plugin, options])` —— 这通常用于 Preset 中。
+*   **List 调用**: `.use([plugin1, plugin2])` —— 同时注册多个插件。
+*   **Struct 调用**: `.use({ plugin: myPlugin, stage: 'parse' })` —— 推荐用于内部开发。
+
+**注意：** 当传入数组时，系统使用**启发式 (Heuristic)** 算法来区分 Tuple 和 List：
+*   如果数组看起来像 `[Function, Object]`，它既可能是 `[Plugin, Options]` (Tuple)，也可能是 `[Plugin, MdastPlugin]` (List)。
+*   系统会检查后续元素。如果后续元素看起来**不像**一个插件（不是函数、不是数组、没有 plugin 属性），系统会判定这是一个 **Tuple**（即后续元素是选项）。
+*   因此，开发 Preset 时，请确保您的结构清晰。
+
+#### 2. 选项传递与 Preset
+
+当您使用 `.use(preset, globalOptions)` 加载一个包含多个插件的数组（Preset）时，`globalOptions` 会被递归地传递给 Preset 中的每一个子插件（除非子插件本身已经绑定了具体的 Options）。这允许用户通过一次调用配置一组插件。
+
+#### 3. 插件签名
+
+现代 `unified` (v11+) 的插件（Attacher）仅接收 `options` 作为参数。上下文（Context）通过 `this` 访问。
+
+```typescript
+// ✅ 正确
+const myPlugin = function(options) {
+  const processor = this; // 访问 processor 上下文
+  return (tree, file) => { ... }; // Transformer 接收 tree 和 file
+}
+
+// ❌ 错误 (旧版风格)
+const myPlugin = function(options, context) { ... }
+```
+
 ### 主插件 (Main Plugins)
 
 每个阶段支持 **单个** 主插件。当一个插件被标记为 `main: true` 时，它将替换最初为该阶段注册的第一个插件。这主要由格式使用，允许用户通过在同一阶段注入不同的插件来覆盖默认的解析器或序列化器。
