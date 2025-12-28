@@ -1,6 +1,6 @@
 
 import { describe, it, expect, vi } from 'vitest';
-import { MdastPipeline, PipelineStage } from '../src/types';
+import { PipelineStage } from '../src/types';
 import { mdast } from '../src/pipeline';
 
 describe('toAst stopAtIndex Behavior', () => {
@@ -9,13 +9,13 @@ describe('toAst stopAtIndex Behavior', () => {
     const plugin2 = vi.fn((tree) => tree);
 
     const pipeline = mdast({ type: 'root', children: [] });
-    
+
     pipeline.use({
       name: 'p1',
       plugin: () => plugin1,
       stage: PipelineStage.parse,
     });
-    
+
     pipeline.use({
       name: 'p2',
       plugin: () => plugin2,
@@ -33,13 +33,13 @@ describe('toAst stopAtIndex Behavior', () => {
     const plugin2 = vi.fn((tree) => tree);
 
     const pipeline = mdast({ type: 'root', children: [] });
-    
+
     pipeline.use({
       name: 'p1',
       plugin: () => plugin1,
       stage: PipelineStage.parse,
     });
-    
+
     pipeline.use({
       name: 'p2',
       plugin: () => plugin2,
@@ -57,7 +57,7 @@ describe('toAst stopAtIndex Behavior', () => {
     const normalPlugin = vi.fn((tree) => tree);
 
     const pipeline = mdast({ type: 'root', children: [] });
-    
+
     // Main plugin at index 0
     pipeline.use({
       name: 'mainP',
@@ -65,7 +65,7 @@ describe('toAst stopAtIndex Behavior', () => {
       stage: PipelineStage.parse,
       main: true
     });
-    
+
     // Normal plugin at index 1
     pipeline.use({
       name: 'normalP',
