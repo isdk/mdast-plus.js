@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.2.4](https://github.com/isdk/mdast-plus.js/compare/v0.2.3...v0.2.4) (2026-01-04)
+
+
+### Features
+
+* rename noteLink to sourceLink and finalize readability metadata features ([fb69062](https://github.com/isdk/mdast-plus.js/commit/fb690626024343866805f4e55a09e901ff9d4a09))
+* support readability metadata injection as frontmatter and source link ([35dc6f3](https://github.com/isdk/mdast-plus.js/commit/35dc6f38e466720b4896620c29549bf159cffa49))
+
 ## [0.2.3](https://github.com/isdk/mdast-plus.js/compare/v0.2.2...v0.2.3) (2025-12-28)
 
 
