@@ -1,8 +1,11 @@
 import type { Plugin } from 'unified';
 import type { Root } from 'hast';
+import { visit } from 'unist-util-visit';
 import { fromHtml } from 'hast-util-from-html';
 import { fromDom } from 'hast-util-from-dom';
+import { stringify as yamlStringify } from 'yaml';
 import { PipelineStage } from '../types';
+import { isNil, omitBy } from 'lodash-es';
 
 export interface ReadabilityOptions {
   // the url of the HTML document
@@ -11,6 +14,16 @@ export interface ReadabilityOptions {
   jsdom?: Record<string, any>;
   hast?: Record<string, any>;
   'rehype-parse'?: Record<string, any>;
+  /**
+   * Whether to inject metadata as frontmatter.
+   * @default false
+   */
+  frontmatter?: boolean | 'yaml' | 'toml';
+  /**
+   * Whether to append source link at the bottom.
+   * @default false
+   */
+  noteLink?: boolean;
 }
 
 /**
@@ -61,9 +74,10 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     // 无用，返回的 domContent 已经不是jsdom了， nodeLocation 没有这个方法！
     // const location = dom.nodeLocation(dom.window.document.querySelector('html')); //dom.window.document.querySelector('div')
 
-    const metadata = {
-      ...article,
-    };
+    const metadata = omitBy(article, isNil);
+    if (url) {
+      metadata.url = url;
+    }
     delete metadata.content;
     delete metadata.textContent;
 
@@ -130,10 +144,42 @@ export const htmlReadabilityPlugin = {
  */
 export const restoreReadabilityMetaPlugin = {
   name: 'restore-readability-meta',
-  plugin: () => (tree: any, file: any) => {
+  plugin: (options?: ReadabilityOptions) => (tree: any, file: any) => {
     if (file.data?.readability) {
       tree.data = tree.data || {};
       tree.data.readability = file.data.readability;
+
+      const { frontmatter, noteLink } = options || {};
+      if (frontmatter) {
+        const type = frontmatter === 'toml' ? 'toml' : 'yaml';
+        const value = yamlStringify(file.data.readability).trim();
+        tree.children.unshift({
+          type,
+          value,
+        });
+      }
+
+      if (noteLink && file.data.readability.url) {
+        const { url, title } = file.data.readability;
+        if (!checkUrlExists(tree, url)) {
+          tree.children.push({
+            type: 'blockquote',
+            children: [
+              {
+                type: 'paragraph',
+                children: [
+                  { type: 'text', value: 'Source: ' },
+                  {
+                    type: 'link',
+                    url,
+                    children: [{ type: 'text', value: title || url }]
+                  }
+                ]
+              }
+            ]
+          });
+        }
+      }
     }
   },
   stage: PipelineStage.parse,
@@ -147,3 +193,37 @@ export const htmlReadabilityPlugins = [
   htmlReadabilityPlugin,
   restoreReadabilityMetaPlugin,
 ];
+
+function isSameUrl(url1: string, url2: string): boolean {
+  if (!url1 || !url2) return false;
+  if (url1 === url2) return true;
+  try {
+    // If one is absolute and the other isn't, they aren't the same (unless resolved, but we assume independence here)
+    // Actually, JSDOM usually resolves links if 'url' is provided.
+    // We try to normalize by parsing.
+    const u1 = new URL(url1);
+    const u2 = new URL(url2);
+    // Compare hrefs (normalized)
+    return u1.href === u2.href;
+  } catch {
+    // If parsing fails (e.g. relative URLs), fallback to strict equality (already checked)
+    // or maybe try to strip trailing slash?
+    const n1 = url1.replace(/\/$/, '');
+    const n2 = url2.replace(/\/$/, '');
+    return n1 === n2;
+  }
+}
+
+export function checkUrlExists(tree: any, url: string): boolean {
+  if (!url) return false;
+  let exists = false;
+
+  visit(tree, 'link', (node: any) => {
+    if (isSameUrl(node.url, url)) {
+      exists = true;
+      return false; // stop visiting
+    }
+  });
+
+  return exists;
+}

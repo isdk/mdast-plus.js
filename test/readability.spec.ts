@@ -121,4 +121,56 @@ describe('HTML Readability Plugin', () => {
     expect(astNoFragment.type).toBe('root');
     expect(astNoFragment.children[0]).toMatchObject({tagName: 'html', type: 'element'});
   });
+
+  it('should inject frontmatter when requested', async () => {
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins, { frontmatter: true })
+      .toMarkdown();
+
+    expect(md).toMatch(/^---/);
+    expect(md).toContain('title: My Article Title');
+    expect(md).toContain('---');
+    expect(md).toContain('# Real Content Heading');
+  });
+
+  it('should append source link when requested', async () => {
+    const url = 'https://example.com/article';
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins, { noteLink: true, url })
+      .toMarkdown();
+
+    expect(md).toContain('> Source: [My Article Title](https://example.com/article)');
+  });
+
+  it('should support both frontmatter and source link', async () => {
+    const url = 'https://example.com/article';
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins, { frontmatter: true, noteLink: true, url })
+      .toMarkdown();
+
+    expect(md).toMatch(/^---/);
+    expect(md).toContain('title: My Article Title');
+    expect(md).toContain('> Source: [My Article Title](https://example.com/article)');
+  });
+
+  it('should not append source link if the URL already exists in the content', async () => {
+    const url = 'https://example.com';
+    const htmlWithLink = `
+      <div>
+        <h1>Title</h1>
+        <p>Check this <a href="${url}">link</a> which is the same as source.</p>
+      </div>
+    `;
+    const md = await mdast(htmlWithLink)
+      .from('html')
+      .use(htmlReadabilityPlugins, { noteLink: true, url })
+      .toMarkdown();
+
+    const sourceCount = (md.match(/Source:/g) || []).length;
+    expect(sourceCount).toBe(0);
+    expect(md).toContain('[link](https://example.com/)');
+  });
 });
