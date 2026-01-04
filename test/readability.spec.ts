@@ -138,7 +138,7 @@ describe('HTML Readability Plugin', () => {
     const url = 'https://example.com/article';
     const md = await mdast(noisyHtml)
       .from('html')
-      .use(htmlReadabilityPlugins, { noteLink: true, url })
+      .use(htmlReadabilityPlugins, { sourceLink: true, url })
       .toMarkdown();
 
     expect(md).toContain('> Source: [My Article Title](https://example.com/article)');
@@ -148,7 +148,7 @@ describe('HTML Readability Plugin', () => {
     const url = 'https://example.com/article';
     const md = await mdast(noisyHtml)
       .from('html')
-      .use(htmlReadabilityPlugins, { frontmatter: true, noteLink: true, url })
+      .use(htmlReadabilityPlugins, { frontmatter: true, sourceLink: true, url })
       .toMarkdown();
 
     expect(md).toMatch(/^---/);
@@ -166,7 +166,7 @@ describe('HTML Readability Plugin', () => {
     `;
     const md = await mdast(htmlWithLink)
       .from('html')
-      .use(htmlReadabilityPlugins, { noteLink: true, url })
+      .use(htmlReadabilityPlugins, { sourceLink: true, url })
       .toMarkdown();
 
     const sourceCount = (md.match(/Source:/g) || []).length;

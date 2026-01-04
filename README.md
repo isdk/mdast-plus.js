@@ -102,12 +102,16 @@ const vfile = await mdast(myInput)
   .data({ myGlobal: 'value' })
   // Add multiple plugins as an array at the 'compile' stage
   .use([pluginA, pluginB])
-  // Or add a set of plugins at a specific stage
-  .useAt('parse', htmlReadabilityPlugins)
+  // Or add a set of plugins at a specific stage with options
+  .useAt('parse', htmlReadabilityPlugins, { 
+    url: 'https://example.com/article',
+    frontmatter: true, // Inject metadata as YAML frontmatter
+    sourceLink: true     // Append source link at the bottom
+  })
   .priority(10) // Run later than default plugins
-  .to('html');
+  .to('markdown');
 
-console.log(vfile.value); // The serialized HTML string
+console.log(vfile.value); // The serialized Markdown with frontmatter
 ```
 
 ### Plugin Behavior
@@ -181,7 +185,7 @@ Each stage can have one "main" plugin. If a plugin is marked with `main: true`, 
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
 | `normalize-inline-styles` | normalize | Standardizes `==mark==`, `~sub~`, and `^sup^`. |
-| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Use `htmlReadabilityPlugins` array for easier setup. |
+| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Supports `frontmatter` injection and `sourceLink` (source link) footer. Use `htmlReadabilityPlugins` array for easier setup. |
 
 ## Contributing
 

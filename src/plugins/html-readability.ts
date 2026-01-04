@@ -23,7 +23,7 @@ export interface ReadabilityOptions {
    * Whether to append source link at the bottom.
    * @default false
    */
-  noteLink?: boolean;
+  sourceLink?: boolean;
 }
 
 /**
@@ -149,7 +149,7 @@ export const restoreReadabilityMetaPlugin = {
       tree.data = tree.data || {};
       tree.data.readability = file.data.readability;
 
-      const { frontmatter, noteLink } = options || {};
+      const { frontmatter, sourceLink } = options || {};
       if (frontmatter) {
         const type = frontmatter === 'toml' ? 'toml' : 'yaml';
         const value = yamlStringify(file.data.readability).trim();
@@ -159,7 +159,7 @@ export const restoreReadabilityMetaPlugin = {
         });
       }
 
-      if (noteLink && file.data.readability.url) {
+      if (sourceLink && file.data.readability.url) {
         const { url, title } = file.data.readability;
         if (!checkUrlExists(tree, url)) {
           tree.children.push({
