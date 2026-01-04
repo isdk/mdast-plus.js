@@ -42,5 +42,6 @@
 ## Functions
 
 - [astCompiler](functions/astCompiler.md)
+- [checkUrlExists](functions/checkUrlExists.md)
 - [jsonParser](functions/jsonParser.md)
 - [mdast](functions/mdast.md)

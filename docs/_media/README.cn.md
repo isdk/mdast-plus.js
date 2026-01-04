@@ -102,12 +102,16 @@ const vfile = await mdast(myInput)
   .data({ myGlobal: 'value' })
   // 以数组形式在 'compile' 阶段添加多个插件
   .use([pluginA, pluginB])
-  // 或在特定阶段添加一组插件
-  .useAt('parse', htmlReadabilityPlugins)
+  // 或在特定阶段添加一组插件并配置选项
+  .useAt('parse', htmlReadabilityPlugins, {
+    url: 'https://example.com/article',
+    frontmatter: true, // 将元数据注入为 YAML Frontmatter
+    sourceLink: true     // 在底部添加原文链接
+  })
   .priority(10) // 比默认插件更晚执行
-  .to('html');
+  .to('markdown');
 
-console.log(vfile.value); // 序列化后的 HTML 字符串
+console.log(vfile.value); // 包含 Frontmatter 的序列化 Markdown 字符串
 ```
 
 ### 插件行为
@@ -181,7 +185,7 @@ const result = await mdast('Hello').to('reverse');
 | `extract-code-meta` | normalize | 从代码块元数据中解析 `title="foo"`。 |
 | `image-size` | normalize | 从图片 URL 中解析 `#=WxH`。 |
 | `normalize-inline-styles` | normalize | 标准化 `==mark==`、`~sub~` 和 `^sup^`。 |
-| `html-readability` | parse | 使用 Mozilla 的 Readability 从 HTML 中提取主体内容。使用 `htmlReadabilityPlugins` 数组可以简化配置。 |
+| `html-readability` | parse | 使用 Mozilla 的 Readability 从 HTML 中提取主体内容。支持 `frontmatter` 注入和 `sourceLink` (原文链接) 页脚。使用 `htmlReadabilityPlugins` 数组可以简化配置。 |
 
 ## 贡献
 
