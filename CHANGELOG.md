@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.0](https://github.com/isdk/mdast-plus.js/compare/v0.2.4...v0.3.0) (2026-01-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **readability:** add fields option for metadata filtering/projection
+
+### Features
+
+* **readability:** add fields option for metadata filtering/projection ([fc88934](https://github.com/isdk/mdast-plus.js/commit/fc889343b0a625d8edbf2036c3e25b676d1bf163))
+* **readability:** add smartExcerpt option to deduplicate redundant excerpts ([2fd3e06](https://github.com/isdk/mdast-plus.js/commit/2fd3e06d30844955fe00d48254b1efd46b2d5b49))
+
+
+### Bug Fixes
+
+* **readability:** should filter empty string value in frontmatter ([8bfda11](https://github.com/isdk/mdast-plus.js/commit/8bfda11b4f3b488516cdbefd0059e13501602d87))
+
 ## [0.2.4](https://github.com/isdk/mdast-plus.js/compare/v0.2.3...v0.2.4) (2026-01-04)
 
 
