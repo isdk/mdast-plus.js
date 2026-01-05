@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.3](https://github.com/isdk/mdast-plus.js/compare/v0.3.2...v0.3.3) (2026-01-05)
+
+
+### Features
+
+* add attachMetadata option to toMarkdown ([ffc9e04](https://github.com/isdk/mdast-plus.js/commit/ffc9e04d9148d701d741216735d74489ec419562))
+
 ## [0.3.2](https://github.com/isdk/mdast-plus.js/compare/v0.3.1...v0.3.2) (2026-01-05)
 
 
