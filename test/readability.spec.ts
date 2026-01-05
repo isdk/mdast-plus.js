@@ -134,6 +134,18 @@ describe('HTML Readability Plugin', () => {
     expect(md).toContain('# Real Content Heading');
   });
 
+  it('should inject TOML frontmatter when requested', async () => {
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins, { frontmatter: 'toml' })
+      .toMarkdown();
+
+    expect(md).toMatch(/^\+\+\+/);
+    expect(md).toContain('title = "My Article Title"');
+    expect(md).toContain('\+\+\+');
+    expect(md).toContain('# Real Content Heading');
+  });
+
   it('should append source link when requested', async () => {
     const url = 'https://example.com/article';
     const md = await mdast(noisyHtml)

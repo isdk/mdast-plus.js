@@ -4,6 +4,7 @@ import { visit } from 'unist-util-visit';
 import { fromHtml } from 'hast-util-from-html';
 import { fromDom } from 'hast-util-from-dom';
 import { stringify as yamlStringify } from 'yaml';
+import { stringify as tomlStringify } from 'smol-toml';
 import { PipelineStage } from '../types';
 import { omitBy, pick } from 'lodash-es';
 
@@ -237,7 +238,7 @@ export const restoreReadabilityMetaPlugin = {
       const { frontmatter, sourceLink } = options || {};
       if (frontmatter) {
         const type = frontmatter === 'toml' ? 'toml' : 'yaml';
-        const value = yamlStringify(file.data.readability).trim();
+        const value = (type === 'toml' ? tomlStringify(file.data.readability).trim() : yamlStringify(file.data.readability)).trim();
         tree.children.unshift({
           type,
           value,
