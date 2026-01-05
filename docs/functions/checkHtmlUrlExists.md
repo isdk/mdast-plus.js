@@ -8,7 +8,7 @@
 
 > **checkHtmlUrlExists**(`tree`, `url`): `boolean`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:316](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L316)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:317](https://github.com/isdk/mdast-plus.js/blob/63ad0024c4c259bf87070606fda5c1b86ee2db1d/src/plugins/html-readability.ts#L317)
 
 ## Parameters
 

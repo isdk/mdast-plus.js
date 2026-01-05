@@ -8,7 +8,7 @@
 
 > `const` **restoreReadabilityMetaPlugin**: `object`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:230](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L230)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:231](https://github.com/isdk/mdast-plus.js/blob/63ad0024c4c259bf87070606fda5c1b86ee2db1d/src/plugins/html-readability.ts#L231)
 
 Plugin to restore readability metadata after HAST to MDAST conversion.
 

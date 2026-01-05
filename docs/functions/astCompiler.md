@@ -8,7 +8,7 @@
 
 > **astCompiler**(`this`): `void`
 
-Defined in: [packages/mdast-plus/src/formats/ast.ts:16](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/formats/ast.ts#L16)
+Defined in: [packages/mdast-plus/src/formats/ast.ts:16](https://github.com/isdk/mdast-plus.js/blob/63ad0024c4c259bf87070606fda5c1b86ee2db1d/src/formats/ast.ts#L16)
 
 Pass-through compiler that returns the AST as-is.
 Essential for unified processes that should output an object (the AST) 

@@ -8,7 +8,7 @@
 
 > `const` **htmlReadabilityPlugin**: `object`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:218](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L218)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:219](https://github.com/isdk/mdast-plus.js/blob/63ad0024c4c259bf87070606fda5c1b86ee2db1d/src/plugins/html-readability.ts#L219)
 
 Pre-configured MdastPlugin for html-readability.
 
