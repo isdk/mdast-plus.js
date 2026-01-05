@@ -575,10 +575,19 @@ export class MdastBasePipeline {
 export class MdastPipeline extends MdastBasePipeline {
   /**
    * Finalizes the pipeline and returns the result as a Markdown string.
+   * @param options - Configuration options.
+   * @param options.attachMetadata - If true, returns a String object with metadata attached (if available).
    */
-  public async toMarkdown() {
+  public async toMarkdown(options?: { attachMetadata?: boolean }): Promise<string | String> {
     const vfile = await this.to('markdown');
-    return String(vfile);
+    const val = String(vfile);
+    if (options?.attachMetadata && vfile.data?.readability) {
+      const { length, ...meta } = vfile.data.readability as Record<string, any>;
+      const strObj = new String(val);
+      Object.assign(strObj, meta);
+      return strObj;
+    }
+    return val;
   }
 
   /**

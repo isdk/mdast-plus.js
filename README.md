@@ -51,6 +51,21 @@ const md = await mdast('Hello ~world~')
   .toMarkdown();
 ```
 
+### Accessing Metadata (String Object)
+
+You can request metadata (like that from `html-readability`) to be attached directly to the returned string object.
+
+```typescript
+const result = await mdast(htmlInput)
+  .useAt('parse', htmlReadabilityPlugins)
+  .toMarkdown({ attachMetadata: true });
+
+// result is a String object
+console.log(result.toString()); // The Markdown content
+console.log((result as any).title); // The extracted title
+console.log((result as any).author); // The extracted author
+```
+
 ### Image Sizing
 
 ```typescript
