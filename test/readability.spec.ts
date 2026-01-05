@@ -168,6 +168,25 @@ describe('HTML Readability Plugin', () => {
     expect(md).toContain('> Source: [My Article Title](https://example.com/article)');
   });
 
+  it('should inject extra metadata into frontmatter', async () => {
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugins, {
+        frontmatter: true,
+        extraMetadata: {
+          author: 'John Doe',
+          category: 'Tech'
+        }
+      })
+      .toMarkdown();
+
+    expect(md).toMatch(/^---/);
+    expect(md).toContain('title: My Article Title');
+    expect(md).toContain('author: John Doe');
+    expect(md).toContain('category: Tech');
+    expect(md).toContain('---');
+  });
+
   it('should not append source link if the URL already exists in the content', async () => {
     const url = 'https://example.com';
     const htmlWithLink = `

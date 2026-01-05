@@ -195,6 +195,7 @@ const result = await mdast('Hello').to('reverse');
 - `fields`: (string[] | object) 控制保留哪些元数据字段或如何重命名它们。
   - 如果是数组：作为白名单（例如 `['title', 'excerpt']`）。
   - 如果是对象：将原始键映射到新名称（例如 `{ title: 'headline' }`）。只有映射中存在的键才会被保留（投影）。
+- `extraMetadata`: (object) 注入到 Frontmatter 中的额外键值对。这些数据将与 readability 提取的元数据合并。
 - `smartExcerpt`: (boolean | object) 是否在摘要与正文内容重复或近乎重复时移除摘要。默认值: `true`。
   - `threshold`: (number) 摘要长度与正文长度的比率阈值 (0.0 到 1.0)。默认值: `0.6`。
   - `minContentLength`: (number) 保留摘要所需的正文最小长度。默认值: `300`。

@@ -52,6 +52,11 @@ export interface ReadabilityOptions {
    * - If an object, it maps original field names to new names. Only the keys present in the map are kept (Projection).
    */
   fields?: string[] | Record<string, string>;
+  /**
+   * Extra key-value pairs to inject into the frontmatter.
+   * These will be merged with the readability metadata.
+   */
+  extraMetadata?: Record<string, any>;
 }
 
 /**
@@ -140,6 +145,10 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
         }
         metadata = newMetadata;
       }
+    }
+
+    if (options?.extraMetadata) {
+      metadata = { ...metadata, ...options.extraMetadata };
     }
 
     if (file) {
@@ -231,11 +240,13 @@ export const htmlReadabilityPlugin = {
 export const restoreReadabilityMetaPlugin = {
   name: 'restore-readability-meta',
   plugin: (options?: ReadabilityOptions) => (tree: any, file: any) => {
-    if (file.data?.readability) {
+    const { frontmatter, sourceLink, extraMetadata } = options || {};
+    if (file.data?.readability || extraMetadata) {
+      file.data = file.data || {};
+      file.data.readability = { ...file.data.readability, ...extraMetadata };
+
       tree.data = tree.data || {};
       tree.data.readability = file.data.readability;
-
-      const { frontmatter, sourceLink } = options || {};
       if (frontmatter) {
         const type = frontmatter === 'toml' ? 'toml' : 'yaml';
         const value = (type === 'toml' ? tomlStringify(file.data.readability).trim() : yamlStringify(file.data.readability)).trim();
