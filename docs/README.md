@@ -199,6 +199,7 @@ Each stage can have one "main" plugin. If a plugin is marked with `main: true`, 
 - `fields`: (string[] | object) Control which metadata fields are kept or how they are renamed. 
   - If an array: acts as an allowlist (e.g., `['title', 'excerpt']`).
   - If an object: maps original keys to new names (e.g., `{ title: 'headline' }`). Only keys in the map are kept (Projection).
+- `extraMetadata`: (object) Extra key-value pairs to inject into the frontmatter. These will be merged with the readability metadata.
 - `smartExcerpt`: (boolean | object) Whether to remove the excerpt if it is a duplicate or near-duplicate of the main content. Default: `true`.
   - `threshold`: (number) The ratio of excerpt length to content length (0.0 to 1.0). Default: `0.6`.
   - `minContentLength`: (number) Minimum length of the main content required to keep the excerpt. Default: `300`.
