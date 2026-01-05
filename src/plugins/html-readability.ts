@@ -7,6 +7,21 @@ import { stringify as yamlStringify } from 'yaml';
 import { PipelineStage } from '../types';
 import { omitBy } from 'lodash-es';
 
+export interface SmartExcerptOptions {
+  /**
+   * The threshold ratio of excerpt length to content length.
+   * If (excerptLength / contentLength) > threshold, the excerpt is considered redundant.
+   * @default 0.6
+   */
+  threshold?: number;
+  /**
+   * The minimum length of the main content required to keep the excerpt.
+   * If content length is less than this value, the excerpt is considered redundant (if it is contained in the content).
+   * @default 300
+   */
+  minContentLength?: number;
+}
+
 export interface ReadabilityOptions {
   // the url of the HTML document
   url?: string;
@@ -24,6 +39,12 @@ export interface ReadabilityOptions {
    * @default false
    */
   sourceLink?: boolean;
+  /**
+   * Whether to remove the excerpt if it is a duplicate or near-duplicate of the main content.
+   * Useful when the content is short or the excerpt is just a subset of the content.
+   * @default true
+   */
+  smartExcerpt?: boolean | SmartExcerptOptions;
 }
 
 /**
@@ -74,7 +95,22 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     // 无用，返回的 domContent 已经不是jsdom了， nodeLocation 没有这个方法！
     // const location = dom.nodeLocation(dom.window.document.querySelector('html')); //dom.window.document.querySelector('div')
 
+    const { smartExcerpt = true } = options || {};
     const metadata = omitBy(article, (v) => v == null || v === '');
+
+    if (smartExcerpt && metadata.excerpt && metadata.textContent) {
+      const { threshold = 0.6, minContentLength = 300 } = smartExcerpt === true ? {} : smartExcerpt;
+      const cleanExcerpt = metadata.excerpt.trim().toLowerCase().replace(/\s+/g, ' ');
+      const cleanContent = metadata.textContent.trim().toLowerCase().replace(/\s+/g, ' ');
+
+      if (cleanContent.includes(cleanExcerpt)) {
+        const ratio = cleanExcerpt.length / cleanContent.length;
+        if (ratio > threshold || cleanContent.length < minContentLength) {
+          delete metadata.excerpt;
+        }
+      }
+    }
+
     if (url) {
       metadata.url = url;
     }

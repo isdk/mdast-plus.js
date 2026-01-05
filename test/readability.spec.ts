@@ -176,4 +176,165 @@ describe('HTML Readability Plugin', () => {
     expect(md).toContain('length: ');
     expect(md).not.toContain('title: ');
   });
+
+  describe('Smart Excerpt', () => {
+    const htmlWithDuplicateExcerpt = `
+      <html>
+        <head><title>Duplicate Excerpt</title></head>
+        <body>
+          <article>
+            <h1>Duplicate Excerpt</h1>
+            <p>This is the content. It is exactly the same as the excerpt because it is short.</p>
+          </article>
+        </body>
+      </html>
+    `;
+
+    // Note: readability's default behavior for short content is often to use the first paragraph as excerpt.
+
+    it('should remove excerpt by default if it overlaps significantly with content', async () => {
+      const ast: any = await mdast(htmlWithDuplicateExcerpt)
+        .from('html')
+        .use(htmlReadabilityPlugin)
+        .toAST({ stage: 'parse' });
+
+      expect(ast.data.readability).toBeDefined();
+      expect(ast.data.readability.excerpt).toBeUndefined();
+    });
+
+    it('should keep excerpt if smartExcerpt is disabled', async () => {
+      const ast: any = await mdast(htmlWithDuplicateExcerpt)
+        .from('html')
+        .use(htmlReadabilityPlugin, { smartExcerpt: false })
+        .toAST({ stage: 'parse' });
+
+      expect(ast.data.readability).toBeDefined();
+      // Readability usually generates an excerpt. Verify it exists.
+      expect(ast.data.readability.excerpt).toBeDefined();
+    });
+
+    it('should keep excerpt if it is unique enough', async () => {
+      const htmlWithUniqueExcerpt = `
+        <html>
+          <head>
+            <title>Unique Excerpt</title>
+            <meta name="description" content="This is a unique summary provided in meta description." />
+          </head>
+          <body>
+            <article>
+              <h1>Unique Excerpt</h1>
+              <p>This is the main content. It is completely different from the meta description which Readability might pick up as the excerpt. We want to ensure that this distinct summary is preserved.</p>
+              <p>Adding more text to make the content length substantially different and ensure ratio is low.</p>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            </article>
+          </body>
+        </html>
+      `;
+
+      const ast: any = await mdast(htmlWithUniqueExcerpt)
+        .from('html')
+        .use(htmlReadabilityPlugin) // Default smartExcerpt: true
+        .toAST({ stage: 'parse' });
+
+      expect(ast.data.readability).toBeDefined();
+      expect(ast.data.readability.excerpt).toBeDefined();
+      expect(ast.data.readability.excerpt).toContain('unique summary');
+    });
+
+    it('should respect custom threshold configuration', async () => {
+      // Create content where excerpt is ~50% of content.
+      // Default threshold is 0.6, so it should be KEPT by default (if length > 300).
+      // If we lower threshold to 0.4, it should be REMOVED.
+      
+      const content = "This is the content. " + "A".repeat(200);
+      const excerpt = "This is the content. " + "A".repeat(50); // overlap
+      
+      // We can't easily force Readability to produce a specific excerpt/content ratio purely via HTML input 
+      // because Readability's logic is complex. 
+      // However, we can mock the internal behavior if we were unit testing the function directly.
+      // Since we are integration testing via the plugin, we rely on the logic:
+      // "If excerpt is contained in content..."
+      
+      // Let's try a case where we force the "short content" rule to NOT apply (long content)
+      // but the overlap is high.
+      
+      const part = "Unique part of content. ";
+      const common = "Common part repeated. ".repeat(20); 
+      const html = `
+        <html>
+          <head><meta name="description" content="${common.trim()}"/></head>
+          <body>
+            <article>
+              <p>${part} ${common}</p>
+              <p>${"B".repeat(500)}</p> <!-- Make content long enough > 300 -->
+            </article>
+          </body>
+        </html>
+      `;
+      
+      // With default threshold 0.6: 
+      // Excerpt (common) length approx 440. Content length > 900. Ratio < 0.5.
+      // Should be KEPT.
+      const astKept: any = await mdast(html)
+        .from('html')
+        .use(htmlReadabilityPlugin)
+        .toAST({ stage: 'parse' });
+        
+      expect(astKept.data.readability.excerpt).toBeDefined();
+
+      // With strict threshold 0.1:
+      // Ratio ~0.4 > 0.1. Should be REMOVED.
+      const astRemoved: any = await mdast(html)
+        .from('html')
+        .use(htmlReadabilityPlugin, { smartExcerpt: { threshold: 0.1 } })
+        .toAST({ stage: 'parse' });
+
+      // Note: This relies on Readability picking up the meta description as excerpt 
+      // and the body as content, and our logic matching them.
+      // Readability normalization might differ, so this test is sensitive.
+      // If this flakes, we might check if excerpt is actually matching.
+      if (astRemoved.data.readability.excerpt) {
+          // Debug info if test fails
+           console.log('Excerpt:', astRemoved.data.readability.excerpt);
+           console.log('Content:', astRemoved.data.readability.textContent);
+      }
+      expect(astRemoved.data.readability.excerpt).toBeUndefined();
+    });
+
+    it('should respect custom minContentLength configuration', async () => {
+      // Content length small, but ratio small.
+      // Default minContentLength is 300.
+      
+      const htmlShort = `
+        <html>
+          <head><meta name="description" content="Short summary"/></head>
+          <body>
+            <article>
+              <p>Short summary is here.</p>
+              <p>Total content length is small but larger than summary.</p>
+            </article>
+          </body>
+        </html>
+      `;
+      
+      // Content length < 300. Excerpt contained.
+      // Default behavior: REMOVE (because length < 300).
+      const astDefault: any = await mdast(htmlShort)
+        .from('html')
+        .use(htmlReadabilityPlugin)
+        .toAST({ stage: 'parse' });
+        
+      expect(astDefault.data.readability.excerpt).toBeUndefined();
+
+      // Custom minContentLength: 10.
+      // Content length > 10. Ratio is small.
+      // Should KEEP.
+      const astCustom: any = await mdast(htmlShort)
+        .from('html')
+        .use(htmlReadabilityPlugin, { smartExcerpt: { minContentLength: 10 } })
+        .toAST({ stage: 'parse' });
+        
+      expect(astCustom.data.readability.excerpt).toBeDefined();
+    });
+  });
 });

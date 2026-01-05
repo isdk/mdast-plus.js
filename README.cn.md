@@ -185,7 +185,16 @@ const result = await mdast('Hello').to('reverse');
 | `extract-code-meta` | normalize | 从代码块元数据中解析 `title="foo"`。 |
 | `image-size` | normalize | 从图片 URL 中解析 `#=WxH`。 |
 | `normalize-inline-styles` | normalize | 标准化 `==mark==`、`~sub~` 和 `^sup^`。 |
-| `html-readability` | parse | 使用 Mozilla 的 Readability 从 HTML 中提取主体内容。支持 `frontmatter` 注入和 `sourceLink` (原文链接) 页脚。使用 `htmlReadabilityPlugins` 数组可以简化配置。 |
+| `html-readability` | parse | 使用 Mozilla 的 Readability 从 HTML 中提取主体内容。支持 `frontmatter` 注入、`sourceLink` (原文链接) 页脚以及 `smartExcerpt` 智能摘要管理。使用 `htmlReadabilityPlugins` 数组可以简化配置。 |
+
+### html-readability 选项
+
+- `url`: (string) HTML 文档的 URL。
+- `frontmatter`: (boolean | 'yaml' | 'toml') 是否将元数据注入为 Frontmatter。默认值: `false`。
+- `sourceLink`: (boolean) 是否在底部添加原文链接。默认值: `false`。
+- `smartExcerpt`: (boolean | object) 是否在摘要与正文内容重复或近乎重复时移除摘要。默认值: `true`。
+  - `threshold`: (number) 摘要长度与正文长度的比率阈值 (0.0 到 1.0)。默认值: `0.6`。
+  - `minContentLength`: (number) 保留摘要所需的正文最小长度。默认值: `300`。
 
 ## 贡献
 

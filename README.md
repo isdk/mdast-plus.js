@@ -185,7 +185,16 @@ Each stage can have one "main" plugin. If a plugin is marked with `main: true`, 
 | `extract-code-meta` | normalize | Parses `title="foo"` from code block meta. |
 | `image-size` | normalize | Parses `#=WxH` from image URLs. |
 | `normalize-inline-styles` | normalize | Standardizes `==mark==`, `~sub~`, and `^sup^`. |
-| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Supports `frontmatter` injection and `sourceLink` (source link) footer. Use `htmlReadabilityPlugins` array for easier setup. |
+| `html-readability` | parse | Uses Mozilla's Readability to extract main content from HTML. Supports `frontmatter` injection, `sourceLink` (source link) footer, and `smartExcerpt` for intelligent summary management. Use `htmlReadabilityPlugins` array for easier setup. |
+
+### html-readability Options
+
+- `url`: (string) The URL of the HTML document.
+- `frontmatter`: (boolean | 'yaml' | 'toml') Whether to inject metadata as frontmatter. Default: `false`.
+- `sourceLink`: (boolean) Whether to append source link at the bottom. Default: `false`.
+- `smartExcerpt`: (boolean | object) Whether to remove the excerpt if it is a duplicate or near-duplicate of the main content. Default: `true`.
+  - `threshold`: (number) The ratio of excerpt length to content length (0.0 to 1.0). Default: `0.6`.
+  - `minContentLength`: (number) Minimum length of the main content required to keep the excerpt. Default: `300`.
 
 ## Contributing
 
