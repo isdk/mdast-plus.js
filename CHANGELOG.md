@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.1](https://github.com/isdk/mdast-plus.js/compare/v0.3.0...v0.3.1) (2026-01-05)
+
+
+### Features
+
+* **readability:** support TOML frontmatter using smol-toml ([63ad002](https://github.com/isdk/mdast-plus.js/commit/63ad0024c4c259bf87070606fda5c1b86ee2db1d))
+
 ## [0.3.0](https://github.com/isdk/mdast-plus.js/compare/v0.2.4...v0.3.0) (2026-01-05)
 
 
