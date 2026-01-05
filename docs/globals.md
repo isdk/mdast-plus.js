@@ -23,6 +23,7 @@
 - [MdastSup](interfaces/MdastSup.md)
 - [PipelineRunOptions](interfaces/PipelineRunOptions.md)
 - [ReadabilityOptions](interfaces/ReadabilityOptions.md)
+- [SmartExcerptOptions](interfaces/SmartExcerptOptions.md)
 
 ## Type Aliases
 
@@ -42,6 +43,7 @@
 ## Functions
 
 - [astCompiler](functions/astCompiler.md)
+- [checkHtmlUrlExists](functions/checkHtmlUrlExists.md)
 - [checkUrlExists](functions/checkUrlExists.md)
 - [jsonParser](functions/jsonParser.md)
 - [mdast](functions/mdast.md)

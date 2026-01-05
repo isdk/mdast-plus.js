@@ -145,6 +145,16 @@ const myPlugin = function(options) {
 const myPlugin = function(options, context) { ... }
 ```
 
+#### 4. Implementation Considerations: Tree Wrapping
+
+When a plugin needs to wrap the AST tree (e.g., adding `<html>`/`<body>` tags or appending footers), follow this pattern:
+
+1. **Prepare Content First**: Collect all content nodes (main content, footers, etc.) into an array.
+2. **Check Existence**: Always check if a node (like a source link) already exists before appending to avoid duplicates.
+3. **Wrap Once**: Perform the final wrapping logic (e.g., based on `isFragment` option) using the prepared array.
+
+This approach ensures robustness across different output configurations and avoids redundant logic.
+
 ### Main Plugins
 
 Each stage supports a **single** main plugin. When a plugin is marked with `main: true`, it will replace the first plugin that was originally registered for that stage. This is primarily used by formats to allow users to override the default parser or stringifier by injecting a different one at the same stage.

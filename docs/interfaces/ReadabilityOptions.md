@@ -6,15 +6,27 @@
 
 # Interface: ReadabilityOptions
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:10](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L10)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:25](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L25)
 
 ## Properties
+
+### fields?
+
+> `optional` **fields**: `string`[] \| `Record`\<`string`, `string`\>
+
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:53](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L53)
+
+Control the fields and names in metadata.
+- If an array of strings, it acts as an allowlist (only these fields are kept).
+- If an object, it maps original field names to new names. Only the keys present in the map are kept (Projection).
+
+***
 
 ### frontmatter?
 
 > `optional` **frontmatter**: `boolean` \| `"yaml"` \| `"toml"`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:21](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L21)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:36](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L36)
 
 Whether to inject metadata as frontmatter.
 
@@ -30,7 +42,7 @@ false
 
 > `optional` **hast**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:15](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L15)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:30](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L30)
 
 ***
 
@@ -38,7 +50,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:15](https://git
 
 > `optional` **jsdom**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:14](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L14)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:29](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L29)
 
 ***
 
@@ -46,7 +58,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:14](https://git
 
 > `optional` **readability**: `false` \| `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L13)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:28](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L28)
 
 ***
 
@@ -54,7 +66,24 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:13](https://git
 
 > `optional` **rehype-parse**: `Record`\<`string`, `any`\>
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:16](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L16)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:31](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L31)
+
+***
+
+### smartExcerpt?
+
+> `optional` **smartExcerpt**: `boolean` \| [`SmartExcerptOptions`](SmartExcerptOptions.md)
+
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:47](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L47)
+
+Whether to remove the excerpt if it is a duplicate or near-duplicate of the main content.
+Useful when the content is short or the excerpt is just a subset of the content.
+
+#### Default
+
+```ts
+true
+```
 
 ***
 
@@ -62,7 +91,7 @@ Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:16](https://git
 
 > `optional` **sourceLink**: `boolean`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:26](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L26)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:41](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L41)
 
 Whether to append source link at the bottom.
 
@@ -78,4 +107,4 @@ false
 
 > `optional` **url**: `string`
 
-Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:12](https://github.com/isdk/mdast-plus.js/blob/fb690626024343866805f4e55a09e901ff9d4a09/src/plugins/html-readability.ts#L12)
+Defined in: [packages/mdast-plus/src/plugins/html-readability.ts:27](https://github.com/isdk/mdast-plus.js/blob/fc889343b0a625d8edbf2036c3e25b676d1bf163/src/plugins/html-readability.ts#L27)
