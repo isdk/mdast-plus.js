@@ -5,7 +5,7 @@ import { fromHtml } from 'hast-util-from-html';
 import { fromDom } from 'hast-util-from-dom';
 import { stringify as yamlStringify } from 'yaml';
 import { PipelineStage } from '../types';
-import { omitBy } from 'lodash-es';
+import { omitBy, pick } from 'lodash-es';
 
 export interface SmartExcerptOptions {
   /**
@@ -45,13 +45,19 @@ export interface ReadabilityOptions {
    * @default true
    */
   smartExcerpt?: boolean | SmartExcerptOptions;
+  /**
+   * Control the fields and names in metadata.
+   * - If an array of strings, it acts as an allowlist (only these fields are kept).
+   * - If an object, it maps original field names to new names. Only the keys present in the map are kept (Projection).
+   */
+  fields?: string[] | Record<string, string>;
 }
 
 /**
  * A unified/rehype plugin that uses Mozilla's Readability to parse the input HTML.
  */
 export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = function (options) {
-  const { readability: readabilityOptions, jsdom: jsdomOptions, hast: hastOptions, url } = options || {};
+  const { readability: readabilityOptions, jsdom: jsdomOptions, hast: hastOptions, url, fields } = options || {};
 
   this.parser = function (doc: string, file: any) {
     if (readabilityOptions === false) {
@@ -95,8 +101,12 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     // 无用，返回的 domContent 已经不是jsdom了， nodeLocation 没有这个方法！
     // const location = dom.nodeLocation(dom.window.document.querySelector('html')); //dom.window.document.querySelector('div')
 
-    const { smartExcerpt = true } = options || {};
-    const metadata = omitBy(article, (v) => v == null || v === '');
+    const { smartExcerpt = true, sourceLink } = options || {};
+    let metadata = omitBy(article, (v) => v == null || v === '');
+
+    // Capture original URL/Title for sourceLink before filtering
+    const sourceLinkUrl = url || metadata.url;
+    const sourceLinkTitle = metadata.title;
 
     if (smartExcerpt && metadata.excerpt && metadata.textContent) {
       const { threshold = 0.6, minContentLength = 300 } = smartExcerpt === true ? {} : smartExcerpt;
@@ -117,16 +127,55 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     delete metadata.content;
     delete metadata.textContent;
 
+    if (fields) {
+      if (Array.isArray(fields)) {
+        metadata = pick(metadata, fields);
+      } else {
+        const newMetadata: Record<string, any> = {};
+        for (const [key, newKey] of Object.entries(fields)) {
+          if (metadata[key] !== undefined) {
+            newMetadata[newKey] = metadata[key];
+          }
+        }
+        metadata = newMetadata;
+      }
+    }
+
     if (file) {
       file.data = file.data || {};
       file.data.readability = metadata;
     }
 
     if (hast) {
+      const children = [hast];
+      if (sourceLink && sourceLinkUrl && !checkHtmlUrlExists(hast, sourceLinkUrl)) {
+        children.push({
+          type: 'element',
+          tagName: 'blockquote',
+          properties: {},
+          children: [
+            {
+              type: 'element',
+              tagName: 'p',
+              properties: {},
+              children: [
+                { type: 'text', value: 'Source: ' },
+                {
+                  type: 'element',
+                  tagName: 'a',
+                  properties: { href: sourceLinkUrl },
+                  children: [{ type: 'text', value: sourceLinkTitle || sourceLinkUrl }]
+                }
+              ]
+            }
+          ]
+        });
+      }
+
       if (isFragment) {
         hast = {
           type: 'root',
-          children: [hast],
+          children,
         }
       } else {
         hast = {
@@ -147,7 +196,7 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
                   type: 'element',
                   tagName: 'body',
                   properties: {},
-                  children: [hast],
+                  children,
                 },
               ],
             },
@@ -256,6 +305,20 @@ export function checkUrlExists(tree: any, url: string): boolean {
 
   visit(tree, 'link', (node: any) => {
     if (isSameUrl(node.url, url)) {
+      exists = true;
+      return false; // stop visiting
+    }
+  });
+
+  return exists;
+}
+
+export function checkHtmlUrlExists(tree: any, url: string): boolean {
+  if (!url) return false;
+  let exists = false;
+
+  visit(tree, 'element', (node: any) => {
+    if (node.tagName === 'a' && node.properties && isSameUrl(node.properties.href as string, url)) {
       exists = true;
       return false; // stop visiting
     }

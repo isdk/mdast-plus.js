@@ -337,4 +337,75 @@ describe('HTML Readability Plugin', () => {
       expect(astCustom.data.readability.excerpt).toBeDefined();
     });
   });
+
+  it('should support fields allowlist', async () => {
+    const ast: any = await mdast(noisyHtml).from('html')
+      .use(htmlReadabilityPlugin, { fields: ['title'] })
+      .toAST({ stage: 'parse' });
+
+    expect(ast.data.readability).toBeDefined();
+    expect(ast.data.readability.title).toBe('My Article Title');
+    expect(ast.data.readability.excerpt).toBeUndefined(); // Should be filtered out
+  });
+
+  it('should support fields projection/renaming', async () => {
+    const ast: any = await mdast(noisyHtml).from('html')
+      .use(htmlReadabilityPlugin, { fields: { title: 'headline', excerpt: 'summary' } })
+      .toAST({ stage: 'parse' });
+
+    expect(ast.data.readability).toBeDefined();
+    expect(ast.data.readability.headline).toBe('My Article Title');
+    expect(ast.data.readability.title).toBeUndefined();
+  });
+
+  it('should generate source link even if url field is filtered out', async () => {
+    const url = 'https://example.com/filtered';
+    // Note: We only use htmlReadabilityPlugin (parser), not the restore plugin.
+    // The parser should inject the source link into HAST, which then becomes Markdown.
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugin, { fields: ['title'], sourceLink: true, url })
+      .toMarkdown();
+
+    expect(md).toContain('> Source: [My Article Title](https://example.com/filtered)');
+  });
+
+  it('should generate source link even if url field is renamed', async () => {
+    const url = 'https://example.com/renamed';
+    const md = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugin, { 
+          fields: { title: 'headline', url: 'permalink' }, 
+          sourceLink: true, 
+          url 
+      })
+      .toMarkdown();
+
+    expect(md).toContain('> Source: [My Article Title](https://example.com/renamed)');
+  });
+
+  it('should generate source link when fragment is false', async () => {
+    const url = 'https://example.com/full';
+    const ast: any = await mdast(noisyHtml)
+      .from('html')
+      .use(htmlReadabilityPlugin, { 
+          hast: { fragment: false }, 
+          sourceLink: true, 
+          url 
+      })
+      .toAST({ stage: 'parse' });
+
+    // Verify structure: root -> html -> body -> [...children, sourceNode]
+    const htmlNode = ast.children.find((c: any) => c.tagName === 'html');
+    expect(htmlNode).toBeDefined();
+    const bodyNode = htmlNode?.children.find((c: any) => c.tagName === 'body');
+    expect(bodyNode).toBeDefined();
+    const blockquote = bodyNode?.children.find((c: any) => c.tagName === 'blockquote');
+    
+    expect(blockquote).toBeDefined();
+    // Path to link: blockquote -> p -> a
+    const paragraph = blockquote.children[0];
+    const link = paragraph.children.find((c: any) => c.tagName === 'a');
+    expect(link.properties.href).toBe(url);
+  });
 });
