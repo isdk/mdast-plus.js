@@ -51,6 +51,21 @@ const md = await mdast('Hello ~world~')
   .toMarkdown();
 ```
 
+### 获取元数据 (String 对象)
+
+您可以请求将元数据（例如来自 `html-readability` 的数据）直接附加到返回的字符串对象上。
+
+```typescript
+const result = await mdast(htmlInput)
+  .useAt('parse', htmlReadabilityPlugins)
+  .toMarkdown({ attachMetadata: true });
+
+// result 是一个 String 对象
+console.log(result.toString()); // Markdown 内容
+console.log((result as any).title); // 提取的标题
+console.log((result as any).author); // 提取的作者
+```
+
 ### 图片尺寸
 
 ```typescript
