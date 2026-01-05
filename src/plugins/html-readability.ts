@@ -5,7 +5,7 @@ import { fromHtml } from 'hast-util-from-html';
 import { fromDom } from 'hast-util-from-dom';
 import { stringify as yamlStringify } from 'yaml';
 import { PipelineStage } from '../types';
-import { isNil, omitBy } from 'lodash-es';
+import { omitBy } from 'lodash-es';
 
 export interface ReadabilityOptions {
   // the url of the HTML document
@@ -74,7 +74,7 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
     // 无用，返回的 domContent 已经不是jsdom了， nodeLocation 没有这个方法！
     // const location = dom.nodeLocation(dom.window.document.querySelector('html')); //dom.window.document.querySelector('div')
 
-    const metadata = omitBy(article, isNil);
+    const metadata = omitBy(article, (v) => v == null || v === '');
     if (url) {
       metadata.url = url;
     }

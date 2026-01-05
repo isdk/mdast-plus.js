@@ -166,11 +166,14 @@ describe('HTML Readability Plugin', () => {
     `;
     const md = await mdast(htmlWithLink)
       .from('html')
-      .use(htmlReadabilityPlugins, { sourceLink: true, url })
+      .use(htmlReadabilityPlugins, { sourceLink: true, url, frontmatter: true })
       .toMarkdown();
 
     const sourceCount = (md.match(/Source:/g) || []).length;
     expect(sourceCount).toBe(0);
     expect(md).toContain('[link](https://example.com/)');
+
+    expect(md).toContain('length: ');
+    expect(md).not.toContain('title: ');
   });
 });
