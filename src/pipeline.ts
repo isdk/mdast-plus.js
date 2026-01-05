@@ -229,7 +229,7 @@ export class MdastBasePipeline {
     if (stage !== undefined) {
       const targetStage = stage;
       // Partial Run: Run only up to the specified stage
-      
+
       // Filter by stage
       runQueue = runQueue.filter(p => {
         const s = (p.stage as PipelineStage) ?? DefaultPipelineStage;
@@ -237,10 +237,10 @@ export class MdastBasePipeline {
       });
 
       const fromIndex = runQueue.findIndex(p => (p.stage ?? DefaultPipelineStage) === targetStage);
-      
+
       // Default to 0 (first plugin) if stopAtIndex is not provided
-      const relativeIndex = stopAtIndex ?? 0; 
-      
+      const relativeIndex = stopAtIndex ?? 0;
+
       // Calculate the absolute index in the queue to stop at
       const toIndex = fromIndex !== -1 ? fromIndex + relativeIndex : runQueue.length - 1;
 
@@ -250,7 +250,7 @@ export class MdastBasePipeline {
       // Identify Main plugins that were excluded by the slice but need to be preserved
       // (Only add them if they aren't already in the sliced queue)
       const reservedMainPlugins = runQueue.filter(p => p.main && !slicedQueue.includes(p));
-      
+
       runQueue = slicedQueue.concat(reservedMainPlugins);
 
       // Ensure Input Plugins are present in the SLICED queue
@@ -265,7 +265,7 @@ export class MdastBasePipeline {
       });
     } else {
       // Full Run: Process entire pipeline and output format
-      
+
       // Check implicit input format BEFORE adding output plugins
       this.ensureInputPlugins(runQueue, overrides, PipelineStage.stringify);
 
@@ -277,7 +277,7 @@ export class MdastBasePipeline {
         }
       }
     }
-    
+
     return runQueue;
   }
 
@@ -357,7 +357,7 @@ export class MdastBasePipeline {
       // If the first element is a function (Plugin), we need to distinguish between:
       // 1. Tuple: [Plugin, Options]
       // 2. List: [Plugin, Plugin, ...]
-      
+
       let isTuple = false;
       if (input.length > 0 && typeof input[0] === 'function') {
         // If any subsequent element is NOT a pluggable, it must be a Tuple (Plugin + Options).
@@ -435,7 +435,7 @@ export class MdastBasePipeline {
       opts = rest;
     } else {
       // Signature 2: useAt(plugin, ...options)
-      targetStage = undefined; 
+      targetStage = undefined;
       input = arg0;
       opts = [arg1, ...rest].filter(x => x !== undefined);
     }
@@ -445,7 +445,7 @@ export class MdastBasePipeline {
     for (const entry of normalized) {
       // If we have a targetStage from arg0, use it as default.
       const defaultStage = targetStage ?? DefaultPipelineStage;
-      
+
       this.queue.push(this.toRuntimeEntry(entry, defaultStage));
     }
 
@@ -578,6 +578,8 @@ export class MdastPipeline extends MdastBasePipeline {
    * @param options - Configuration options.
    * @param options.attachMetadata - If true, returns a String object with metadata attached (if available).
    */
+  public async toMarkdown(): Promise<string>
+  public async toMarkdown(options: { attachMetadata?: boolean }): Promise<string | String>
   public async toMarkdown(options?: { attachMetadata?: boolean }): Promise<string | String> {
     const vfile = await this.to('markdown');
     const val = String(vfile);
