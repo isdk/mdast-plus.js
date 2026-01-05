@@ -1,7 +1,7 @@
 {
   "name": "@isdk/mdast-plus",
   "description": "A semantic-first Markdown processing toolkit based on unified, remark, and rehype with a Fluent API and staged plugin system.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "license": "MIT",
   "author": "Riceball LEE <snowyu.lee@gmail.com>",
   "homepage": "https://github.com/isdk/mdast-plus.js",

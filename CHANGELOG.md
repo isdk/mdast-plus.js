@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.4](https://github.com/isdk/mdast-plus.js/compare/v0.3.3...v0.3.4) (2026-01-05)
+
+
+### Bug Fixes
+
+* **pipeline:** update ts declaration for toMarkdown() ([5a6a466](https://github.com/isdk/mdast-plus.js/commit/5a6a4660c9e58c3f1962ac06703980775afb9c70))
+
 ## [0.3.3](https://github.com/isdk/mdast-plus.js/compare/v0.3.2...v0.3.3) (2026-01-05)
 
 
