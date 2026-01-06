@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.5](https://github.com/isdk/mdast-plus.js/compare/v0.3.4...v0.3.5) (2026-01-06)
+
+
+### Bug Fixes
+
+* **readability:** do not inject empty frontmatter if no metadata is available ([52d1ca8](https://github.com/isdk/mdast-plus.js/commit/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2))
+
 ## [0.3.4](https://github.com/isdk/mdast-plus.js/compare/v0.3.3...v0.3.4) (2026-01-05)
 
 
