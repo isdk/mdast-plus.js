@@ -6,7 +6,7 @@
 
 # Interface: MdastPlugin
 
-Defined in: [packages/mdast-plus/src/types.ts:33](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L33)
+Defined in: [packages/mdast-plus/src/types.ts:33](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L33)
 
 Configuration for a plugin within the mdast-plus pipeline.
 It wraps a standard unified plugin with execution metadata.
@@ -17,7 +17,7 @@ It wraps a standard unified plugin with execution metadata.
 
 > `optional` **after**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:60](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L60)
+Defined in: [packages/mdast-plus/src/types.ts:60](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L60)
 
 Run this plugin after the named plugin (within the same stage).
 
@@ -27,7 +27,7 @@ Run this plugin after the named plugin (within the same stage).
 
 > `optional` **before**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:58](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L58)
+Defined in: [packages/mdast-plus/src/types.ts:58](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L58)
 
 Run this plugin before the named plugin (within the same stage).
 
@@ -37,7 +37,7 @@ Run this plugin before the named plugin (within the same stage).
 
 > `optional` **main**: `boolean`
 
-Defined in: [packages/mdast-plus/src/types.ts:56](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L56)
+Defined in: [packages/mdast-plus/src/types.ts:56](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L56)
 
 If true, this plugin is considered the "main" plugin for its stage.
 When multiple plugins exist in the same stage, a 'main' plugin will
@@ -49,7 +49,7 @@ replace the default (first) plugin of that stage.
 
 > `optional` **name**: `string`
 
-Defined in: [packages/mdast-plus/src/types.ts:39](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L39)
+Defined in: [packages/mdast-plus/src/types.ts:39](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L39)
 
 Optional name for the plugin.
 Used for identification in overrides and logging.
@@ -61,7 +61,7 @@ If not provided, defaults to the plugin function's name.
 
 > `optional` **options**: `any`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:46](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L46)
+Defined in: [packages/mdast-plus/src/types.ts:46](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L46)
 
 Arguments passed to the plugin.
 MUST be an array of arguments (e.g., [optionsObject]).
@@ -72,7 +72,7 @@ MUST be an array of arguments (e.g., [optionsObject]).
 
 > `optional` **order**: `number`
 
-Defined in: [packages/mdast-plus/src/types.ts:50](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L50)
+Defined in: [packages/mdast-plus/src/types.ts:50](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L50)
 
 Execution priority within the same stage. Lower values run earlier.
 
@@ -82,7 +82,7 @@ Execution priority within the same stage. Lower values run earlier.
 
 > **plugin**: `Plugin`\<`any`[], `any`, `any`\>
 
-Defined in: [packages/mdast-plus/src/types.ts:41](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L41)
+Defined in: [packages/mdast-plus/src/types.ts:41](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L41)
 
 The standard unified plugin (attacher) function.
 
@@ -92,6 +92,6 @@ The standard unified plugin (attacher) function.
 
 > `optional` **stage**: [`PipelineStage`](../enumerations/PipelineStage.md) \| `"parse"` \| `"normalize"` \| `"compile"` \| `"finalize"` \| `"stringify"`
 
-Defined in: [packages/mdast-plus/src/types.ts:48](https://github.com/isdk/mdast-plus.js/blob/5a6a4660c9e58c3f1962ac06703980775afb9c70/src/types.ts#L48)
+Defined in: [packages/mdast-plus/src/types.ts:48](https://github.com/isdk/mdast-plus.js/blob/52d1ca889a60b0073e2ea9d89beea6e3ef7680a2/src/types.ts#L48)
 
 The stage in which this plugin should run.
