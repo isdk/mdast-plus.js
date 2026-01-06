@@ -439,4 +439,26 @@ describe('HTML Readability Plugin', () => {
     const link = paragraph.children.find((c: any) => c.tagName === 'a');
     expect(link.properties.href).toBe(url);
   });
+
+  it('should not inject empty frontmatter if no metadata is available', async () => {
+    const htmlNoMeta = `
+      <html>
+        <body>
+          <p>Just some content.</p>
+        </body>
+      </html>
+    `;
+    
+    // We need to simulate a situation where metadata might be empty or filtered out completely
+    // but frontmatter: true is requested.
+    const md = await mdast(htmlNoMeta)
+      .from('html')
+      // If we ask for fields that don't exist, the result might be empty object.
+      .use(htmlReadabilityPlugins, { frontmatter: true, fields: ['nonExistentField'] })
+      .toMarkdown();
+
+    expect(md).not.toMatch(/^---\s*\{\}\s*---/);
+    expect(md).not.toContain('---');
+    expect(md).toContain('Just some content');
+  });
 });

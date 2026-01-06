@@ -247,13 +247,15 @@ export const restoreReadabilityMetaPlugin = {
 
       tree.data = tree.data || {};
       tree.data.readability = file.data.readability;
-      if (frontmatter) {
+      if (frontmatter && Object.keys(file.data.readability).length > 0) {
         const type = frontmatter === 'toml' ? 'toml' : 'yaml';
         const value = (type === 'toml' ? tomlStringify(file.data.readability).trim() : yamlStringify(file.data.readability)).trim();
-        tree.children.unshift({
-          type,
-          value,
-        });
+        if (value) {
+          tree.children.unshift({
+            type,
+            value,
+          });
+        }
       }
 
       if (sourceLink && file.data.readability.url) {
