@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [0.3.6](https://github.com/isdk/mdast-plus.js/compare/v0.3.5...v0.3.6) (2026-04-14)
+
+
+### Bug Fixes
+
+* **readability:** replace dynamic require with top-level ESM imports ([2ea5365](https://github.com/isdk/mdast-plus.js/commit/2ea5365f4aab848bca73b551726e0ff0a97d2d6c))
+
 ## [0.3.5](https://github.com/isdk/mdast-plus.js/compare/v0.3.4...v0.3.5) (2026-01-06)
 
 
