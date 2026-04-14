@@ -5,6 +5,8 @@ import { fromHtml } from 'hast-util-from-html';
 import { fromDom } from 'hast-util-from-dom';
 import { stringify as yamlStringify } from 'yaml';
 import { stringify as tomlStringify } from 'smol-toml';
+import { JSDOM } from 'jsdom';
+import { Readability } from '@mozilla/readability';
 import { PipelineStage } from '../types';
 import { omitBy, pick } from 'lodash-es';
 
@@ -68,18 +70,6 @@ export const htmlReadability: Plugin<[ReadabilityOptions?], string, Root> = func
   this.parser = function (doc: string, file: any) {
     if (readabilityOptions === false) {
       return fromHtml(doc, { fragment: true, ...hastOptions });
-    }
-
-    let JSDOM: any;
-    let Readability: any;
-
-    try {
-      const jsdomPkg = require('jsdom');
-      JSDOM = jsdomPkg.JSDOM;
-      const readabilityPkg = require('@mozilla/readability');
-      Readability = readabilityPkg.Readability;
-    } catch (error) {
-      throw new Error(`[html-readability] Dependency missing. Please install 'jsdom' and '@mozilla/readability'.`);
     }
 
     const dom = new JSDOM(doc, { url, pretendToBeVisual: true, ...jsdomOptions, includeNodeLocations: true });
