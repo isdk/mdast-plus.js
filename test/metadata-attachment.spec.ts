@@ -34,6 +34,11 @@ describe('Metadata Attachment in toMarkdown', () => {
     expect(resultAny.title).toBe('Test Title');
     expect(resultAny.author).toBe('Tester');
     expect(resultAny.extra).toBe('info');
+    expect(resultAny.metadata).toMatchObject({
+      title: 'Test Title',
+      author: 'Tester',
+      extra: 'info',
+    });
 
     // Verify length property safety
     // The length of '# Hello World\n' is 14

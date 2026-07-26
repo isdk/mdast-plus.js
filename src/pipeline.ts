@@ -585,8 +585,9 @@ export class MdastPipeline extends MdastBasePipeline {
     const val = String(vfile);
     if (options?.attachMetadata && vfile.data?.readability) {
       const { length, ...meta } = vfile.data.readability as Record<string, any>;
-      const strObj = new String(val);
+      const strObj = new String(val) as String & {metadata: any};
       Object.assign(strObj, meta);
+      strObj.metadata = meta
       return strObj;
     }
     return val;
