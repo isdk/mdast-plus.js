@@ -68,6 +68,7 @@ const result = await mdast(htmlInput)
 console.log(result.toString()); // The Markdown content
 console.log((result as any).title); // The extracted title
 console.log((result as any).author); // The extracted author
+console.log((result as any).metadata); // The collection metadata which include title, author etc
 ```
 
 ### Image Sizing
@@ -95,7 +96,7 @@ You can stop the pipeline at any stage to inspect the intermediate AST, even whe
 // Run 'markdown' pipeline but stop after 'parse' stage
 // Returns the VFile with the AST at that point
 const vfile = await mdast(input).to('markdown', { stage: 'parse' });
-const ast = vfile.result; 
+const ast = vfile.result;
 ```
 
 ### Runtime Overrides
@@ -122,7 +123,7 @@ const vfile = await mdast(myInput)
   // Add multiple plugins as an array at the 'compile' stage
   .use([pluginA, pluginB])
   // Or add a set of plugins at a specific stage with options
-  .useAt('parse', htmlReadabilityPlugins, { 
+  .useAt('parse', htmlReadabilityPlugins, {
     url: 'https://example.com/article',
     frontmatter: true, // Inject metadata as YAML frontmatter
     sourceLink: true     // Append source link at the bottom
@@ -211,7 +212,7 @@ Each stage can have one "main" plugin. If a plugin is marked with `main: true`, 
 - `url`: (string) The URL of the HTML document.
 - `frontmatter`: (boolean | 'yaml' | 'toml') Whether to inject metadata as frontmatter. Default: `false`.
 - `sourceLink`: (boolean) Whether to append source link at the bottom. The link will be generated based on the original title/URL even if they are filtered or renamed in the `fields` option. Default: `false`.
-- `fields`: (string[] | object) Control which metadata fields are kept or how they are renamed. 
+- `fields`: (string[] | object) Control which metadata fields are kept or how they are renamed.
   - If an array: acts as an allowlist (e.g., `['title', 'excerpt']`).
   - If an object: maps original keys to new names (e.g., `{ title: 'headline' }`). Only keys in the map are kept (Projection).
 - `extraMetadata`: (object) Extra key-value pairs to inject into the frontmatter. These will be merged with the readability metadata.

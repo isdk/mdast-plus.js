@@ -8,7 +8,7 @@
 
 > `const` **markdownFormat**: [`MdastFormat`](../interfaces/MdastFormat.md)
 
-Defined in: [packages/mdast-plus/src/formats/markdown.ts:103](https://github.com/isdk/mdast-plus.js/blob/2ea5365f4aab848bca73b551726e0ff0a97d2d6c/src/formats/markdown.ts#L103)
+Defined in: [packages/mdast-plus/src/formats/markdown.ts:103](https://github.com/isdk/mdast-plus.js/blob/ad2fd92de22e26739779fb84d9a8b23a9076c4be/src/formats/markdown.ts#L103)
 
 Markdown format definition.
 

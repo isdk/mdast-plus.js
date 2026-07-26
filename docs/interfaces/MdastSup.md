@@ -6,7 +6,7 @@
 
 # Interface: MdastSup
 
-Defined in: [packages/mdast-plus/src/types.ts:130](https://github.com/isdk/mdast-plus.js/blob/2ea5365f4aab848bca73b551726e0ff0a97d2d6c/src/types.ts#L130)
+Defined in: [packages/mdast-plus/src/types.ts:130](https://github.com/isdk/mdast-plus.js/blob/ad2fd92de22e26739779fb84d9a8b23a9076c4be/src/types.ts#L130)
 
 Represents a superscript text node in mdast.
 
@@ -20,7 +20,7 @@ Represents a superscript text node in mdast.
 
 > **children**: `PhrasingContent`[]
 
-Defined in: [packages/mdast-plus/src/types.ts:132](https://github.com/isdk/mdast-plus.js/blob/2ea5365f4aab848bca73b551726e0ff0a97d2d6c/src/types.ts#L132)
+Defined in: [packages/mdast-plus/src/types.ts:132](https://github.com/isdk/mdast-plus.js/blob/ad2fd92de22e26739779fb84d9a8b23a9076c4be/src/types.ts#L132)
 
 List of children.
 
@@ -32,7 +32,7 @@ List of children.
 
 ### data?
 
-> `optional` **data**: `Data`
+> `optional` **data?**: `Data`
 
 Defined in: node\_modules/.pnpm/@types+unist@3.0.3/node\_modules/@types/unist/index.d.ts:95
 
@@ -46,7 +46,7 @@ Info from the ecosystem.
 
 ### position?
 
-> `optional` **position**: `Position`
+> `optional` **position?**: `Position`
 
 Defined in: node\_modules/.pnpm/@types+unist@3.0.3/node\_modules/@types/unist/index.d.ts:103
 
@@ -65,7 +65,7 @@ have a position.
 
 > **type**: `"sup"`
 
-Defined in: [packages/mdast-plus/src/types.ts:131](https://github.com/isdk/mdast-plus.js/blob/2ea5365f4aab848bca73b551726e0ff0a97d2d6c/src/types.ts#L131)
+Defined in: [packages/mdast-plus/src/types.ts:131](https://github.com/isdk/mdast-plus.js/blob/ad2fd92de22e26739779fb84d9a8b23a9076c4be/src/types.ts#L131)
 
 Node type.
 
