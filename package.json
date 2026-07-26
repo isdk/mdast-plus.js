@@ -1,7 +1,7 @@
 {
   "name": "@isdk/mdast-plus",
   "description": "A semantic-first Markdown processing toolkit based on unified, remark, and rehype with a Fluent API and staged plugin system.",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "license": "MIT",
   "author": "Riceball LEE <snowyu.lee@gmail.com>",
   "homepage": "https://github.com/isdk/mdast-plus.js",
@@ -83,6 +83,7 @@
     "@types/shell-quote": "^1.7.5",
     "@types/unist": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "~8.41.0",
+    "commit-and-tag-version": "^13.1.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-tsdoc": "^0.4.0",
