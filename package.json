@@ -34,7 +34,7 @@
     "lint": "eslint .",
     "lint:fix": "pnpm run lint --fix",
     "test": "vitest run",
-    "release": "pnpm run clean && pnpm run build && git add -f docs && git ci -m 'docs: update API docs' && pnpm exec commit-and-tag-version -s",
+    "release": "pnpm run clean && pnpm run build && git add -f docs && git ci -m 'docs: update API docs' && npx commit-and-tag-version -s",
     "release.alpha": "pnpm run release -- --prerelease alpha"
   },
   "dependencies": {
@@ -83,7 +83,6 @@
     "@types/shell-quote": "^1.7.5",
     "@types/unist": "^3.0.3",
     "@typescript-eslint/eslint-plugin": "~8.41.0",
-    "commit-and-tag-version": "^13.1.0",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-tsdoc": "^0.4.0",
@@ -93,8 +92,8 @@
     "terser": "^5.44.0",
     "tsup": "^8.5.0",
     "tsx": "^4.20.5",
-    "typedoc": "^0.28.16",
-    "typedoc-plugin-markdown": "^4.8.1",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "~5.7.3",
     "vite": "^7.1.4",
     "vitest": "^3.2.4",
